@@ -3,280 +3,330 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>هواشناسی سه‌بعدی</title>
+<title>پیش‌بینی هواشناسی دقیق</title>
+<link href="https://cdn.jsdelivr.net/npm/vazir-font@v1.1.2/dist/font-face.css" rel="stylesheet">
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
   body {
-    font-family: sans-serif;
+    font-family: Vazir, sans-serif;
+    margin: 0; padding: 0; background: #eef6fb; color: #222;
     direction: rtl;
-    background: #eef6fb;
-    margin: 0;
-    padding: 15px;
-    color: #003366;
-    text-align: center;
   }
-  h1, h2 {
-    margin: 10px 0;
+  header {
+    background: #2196f3; color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+  }
+  header h1 {
+    margin: 0; font-size: 1.6rem;
+  }
+  #langToggle {
+    background: white; border: none; padding: 8px 15px; border-radius: 8px; color: #2196f3; font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  #searchSection {
+    margin: 15px 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
   }
   #cityInput {
-    padding: 10px;
-    width: 80%;
-    max-width: 320px;
-    font-size: 16px;
-    border-radius: 6px;
-    border: 1px solid #2196f3;
+    width: 260px; padding: 10px 12px; font-size: 1rem; border-radius: 8px; border: 1.5px solid #2196f3;
     outline: none;
   }
-  button {
-    padding: 10px 16px;
-    margin: 0 5px;
-    font-size: 16px;
-    border-radius: 6px;
-    border: none;
+  #searchBtn {
+    background: #2196f3; border: none; padding: 10px 18px; border-radius: 8px; color: white; font-weight: bold;
     cursor: pointer;
-    background-color: #2196f3;
-    color: white;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
+    font-size: 1rem;
   }
-  button:hover {
-    background-color: #0b62c4;
-  }
-  .ad-box {
-    margin: 20px auto;
-    background: #fff8dc;
-    padding: 12px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-width: 320px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: #d32f2f;
-  }
-  .ad-box a {
-    color: #d32f2f;
-    text-decoration: none;
+  #cityName {
+    margin: 12px auto; text-align: center; font-size: 1.3rem; font-weight: bold; color: #0b3d91;
   }
   #mapFrame {
-    width: 90%;
-    height: 300px;
-    border: none;
-    border-radius: 12px;
-    margin: 15px auto;
-    display: block;
+    display: block; margin: 10px auto; border-radius: 12px; border: none;
+    width: 90vw; max-width: 600px; height: 280px;
   }
+  /* پیش‌بینی ۵ روزه */
+  #dailyForecast {
+    display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; padding: 15px 10px;
+  }
+  .day-card {
+    background: white; border-radius: 16px; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    width: 120px; padding: 10px 10px 18px; text-align: center;
+    font-size: 0.95rem;
+  }
+  .day-card h3 {
+    margin: 6px 0 10px; font-weight: bold; font-size: 1.1rem;
+  }
+  .day-icon {
+    width: 64px; height: 64px;
+  }
+  .temp-day, .temp-night {
+    margin: 6px 0; font-weight: 600;
+  }
+  /* پیش‌بینی ساعتی */
+  #hourlyForecast {
+    margin: 20px auto; max-width: 95vw; overflow-x: auto; padding-bottom: 10px;
+  }
+  #hourlyForecast .hour-card {
+    display: inline-block; background: white; border-radius: 14px; padding: 10px 14px; margin: 0 8px;
+    width: 110px; box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    text-align: center; font-size: 0.9rem;
+  }
+  .hour-time {
+    font-weight: bold; margin-bottom: 8px;
+  }
+  .hour-icon {
+    width: 40px; height: 40px;
+  }
+  .hour-temp {
+    margin: 6px 0; font-weight: 600;
+  }
+  .hour-desc {
+    font-size: 0.85rem; color: #555;
+  }
+  .hour-wind, .hour-humidity {
+    font-size: 0.8rem; color: #777; margin-top: 4px;
+  }
+  /* نمودار دما و باد */
   #plots {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin-top: 20px;
+    margin: 30px auto; max-width: 650px;
   }
-  .plot-container {
-    width: 600px;
-    max-width: 90vw;
+  /* تبلیغات تماس */
+  .ad-box {
+    position: fixed; bottom: 15px; left: 15px;
+    background: #fdf5e6; border: 2px solid #f39c12; border-radius: 14px;
+    padding: 8px 14px; font-weight: bold; color: #b35e00;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    cursor: pointer;
+    user-select: none;
+  }
+  .ad-box a {
+    color: #b35e00; text-decoration: none;
+  }
+  @media (max-width: 480px) {
+    #dailyForecast {
+      justify-content: center;
+    }
+    #hourlyForecast .hour-card {
+      width: 90px;
+      margin: 0 6px;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+    }
+    #plots {
+      width: 95vw;
+    }
   }
 </style>
 </head>
 <body>
-  <h1 id="title">وضعیت آب‌وهوا - نمودار سه‌بعدی</h1>
-  <input id="cityInput" placeholder="نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)" />
-  <button onclick="searchCity()">🔍 جستجو</button>
+
+<header>
+  <h1 id="title">پیش‌بینی هواشناسی</h1>
   <button id="langToggle" onclick="toggleLang()">AR</button>
+</header>
 
-  <div class="ad-box">
-    <a href="tel:09332356547" id="callLink">📞 تماس با 09332356547</a>
-  </div>
+<section id="searchSection">
+  <input id="cityInput" placeholder="نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)" />
+  <button id="searchBtn" onclick="searchCity()">🔍 جستجو</button>
+</section>
 
-  <h2 id="cityName">اهواز</h2>
-  <iframe id="mapFrame" src=""></iframe>
+<div id="cityName">اهواز</div>
+<iframe id="mapFrame" src="" allowfullscreen loading="lazy"></iframe>
 
-  <div id="plots">
-    <div class="plot-container">
-      <h3 id="tempTitle">دمای هوا (°C)</h3>
-      <div id="tempPlot"></div>
-    </div>
-    <div class="plot-container">
-      <h3 id="windTitle">سرعت باد (m/s)</h3>
-      <div id="windPlot"></div>
-    </div>
-    <div class="plot-container">
-      <h3 id="humidityTitle">رطوبت (%)</h3>
-      <div id="humidityPlot"></div>
-    </div>
-  </div>
+<section id="dailyForecast"></section>
 
+<section id="hourlyForecast"></section>
+
+<div id="plots"></div>
+
+<div class="ad-box">
+  <a href="tel:09332356547" id="callLink">📞 تماس با 09332356547</a>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-  const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88";
-  let currentLang = "fa";
+const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88";
+let currentLang = "fa";
 
-  const labels = {
-    fa: {
-      title: "وضعیت آب‌وهوا - نمودار سه‌بعدی",
-      searchPlaceholder: "نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)",
-      call: "📞 تماس با 09332356547",
-      cityNotFound: "شهر مورد نظر پیدا نشد.",
-      tempTitle: "دمای هوا (°C)",
-      windTitle: "سرعت باد (m/s)",
-      humidityTitle: "رطوبت (%)"
-    },
-    ar: {
-      title: "حالة الطقس - رسم ثلاثي الأبعاد",
-      searchPlaceholder: "أدخل اسم المدينة أو القرية",
-      call: "📞 اتصل بـ 09332356547",
-      cityNotFound: "لم يتم العثور على المدينة.",
-      tempTitle: "درجة الحرارة (°C)",
-      windTitle: "سرعة الرياح (m/s)",
-      humidityTitle: "الرطوبة (%)"
+const labels = {
+  fa: {
+    title: "پیش‌بینی هواشناسی",
+    searchPlaceholder: "نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)",
+    cityNotFound: "شهر مورد نظر پیدا نشد.",
+    dailyTitle: "پیش‌بینی ۵ روزه",
+    hourlyTitle: "پیش‌بینی ساعتی",
+    tempDay: "روز",
+    tempNight: "شب",
+    wind: "باد",
+    humidity: "رطوبت",
+    call: "📞 تماس با 09332356547",
+    directionLabels: ["شمال", "شمال‌شرقی", "شرق", "جنوب‌شرقی", "جنوب", "جنوب‌غربی", "غرب", "شمال‌غربی"],
+  },
+  ar: {
+    title: "توقعات الطقس",
+    searchPlaceholder: "أدخل اسم المدينة أو القرية",
+    cityNotFound: "لم يتم العثور على المدينة.",
+    dailyTitle: "توقعات ٥ أيام",
+    hourlyTitle: "توقعات كل ساعة",
+    tempDay: "نهار",
+    tempNight: "ليل",
+    wind: "الرياح",
+    humidity: "الرطوبة",
+    call: "📞 اتصل بـ 09332356547",
+    directionLabels: ["شمال", "شمال شرقي", "شرق", "جنوب شرقي", "جنوب", "جنوب غربي", "غرب", "شمال غربي"],
+  }
+};
+
+function toggleLang(){
+  currentLang = currentLang === "fa" ? "ar" : "fa";
+  document.getElementById("title").innerText = labels[currentLang].title;
+  document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
+  document.getElementById("langToggle").innerText = currentLang === "fa" ? "AR" : "FA";
+  document.getElementById("callLink").innerText = labels[currentLang].call;
+  renderForecast(lastWeatherData);
+}
+
+function degToDir(deg){
+  const d = labels[currentLang].directionLabels;
+  return d[Math.round(deg / 45) % 8];
+}
+
+let lastWeatherData = null;
+
+async function searchCity(){
+  const city = document.getElementById("cityInput").value.trim();
+  if(!city) return;
+  try {
+    const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`);
+    const geoData = await geoRes.json();
+    if(!geoData.length){
+      alert(labels[currentLang].cityNotFound);
+      return;
     }
+    const { lat, lon, name, country } = geoData[0];
+    document.getElementById("cityName").innerText = `${name}, ${country}`;
+    document.getElementById("mapFrame").src =
+      `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.2},${lat - 0.2},${lon + 0.2},${lat + 0.2}&layer=mapnik`;
+
+    const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=${currentLang}&appid=${API_KEY}`);
+    const weatherData = await weatherRes.json();
+    lastWeatherData = weatherData;
+    renderForecast(weatherData);
+  } catch(e){
+    alert("خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.");
+    console.error(e);
+  }
+}
+
+function renderForecast(data){
+  if(!data) return;
+
+  // پیش‌بینی ۵ روزه
+  const dailySection = document.getElementById("dailyForecast");
+  dailySection.innerHTML = `<h2 style="text-align:center;margin-bottom:12px;">${labels[currentLang].dailyTitle}</h2>`;
+  // دسته بندی روزها
+  let dailyMap = {};
+  data.list.forEach(item=>{
+    const date = item.dt_txt.split(" ")[0];
+    if(!dailyMap[date]) dailyMap[date] = [];
+    dailyMap[date].push(item);
+  });
+  const days = Object.keys(dailyMap).slice(0,5);
+
+  days.forEach(day => {
+    // میانگین دمای روز و شب
+    const dayTemps = dailyMap[day].filter(i=> {
+      const hour = parseInt(i.dt_txt.split(" ")[1].split(":")[0]);
+      return hour >= 6 && hour <= 18;
+    });
+    const nightTemps = dailyMap[day].filter(i=>{
+      const hour = parseInt(i.dt_txt.split(" ")[1].split(":")[0]);
+      return hour < 6 || hour > 18;
+    });
+
+    const avgDayTemp = dayTemps.reduce((a,b)=>a+b.main.temp,0)/dayTemps.length || 0;
+    const avgNightTemp = nightTemps.reduce((a,b)=>a+b.main.temp,0)/nightTemps.length || 0;
+    // آیکون غالب روز
+    const dayIcon = dayTemps.length ? dayTemps[0].weather[0].icon : dailyMap[day][0].weather[0].icon;
+    // توضیح غالب روز
+    const dayDesc = dayTemps.length ? dayTemps[0].weather[0].description : dailyMap[day][0].weather[0].description;
+
+    dailySection.innerHTML += `
+      <div class="day-card">
+        <h3>${day}</h3>
+        <img src="https://openweathermap.org/img/wn/${dayIcon}@2x.png" alt="weather icon" class="day-icon" />
+        <div class="temp-day">${labels[currentLang].tempDay}: ${avgDayTemp.toFixed(1)}°C</div>
+        <div class="temp-night">${labels[currentLang].tempNight}: ${avgNightTemp.toFixed(1)}°C</div>
+        <div>${dayDesc}</div>
+      </div>
+    `;
+  });
+
+  // پیش‌بینی ساعتی
+  const hourlySection = document.getElementById("hourlyForecast");
+  hourlySection.innerHTML = `<h2 style="text-align:center;margin-bottom:12px;">${labels[currentLang].hourlyTitle}</h2>`;
+  // فقط 24 ساعت آینده
+  const next24 = data.list.slice(0,8);
+
+  next24.forEach(item=>{
+    const hour = item.dt_txt.split(" ")[1].slice(0,5);
+    const windDir = degToDir(item.wind.deg);
+    hourlySection.innerHTML += `
+      <div class="hour-card">
+        <div class="hour-time">${hour}</div>
+        <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" alt="icon" class="hour-icon" />
+        <div class="hour-temp">${item.main.temp.toFixed(1)}°C</div>
+        <div class="hour-desc">${item.weather[0].description}</div>
+        <div class="hour-wind">${labels[currentLang].wind}: ${item.wind.speed} m/s ${windDir}</div>
+        <div class="hour-humidity">${labels[currentLang].humidity}: ${item.main.humidity}%</div>
+      </div>
+    `;
+  });
+
+  // نمودار دما و باد
+  plotCharts(next24);
+}
+
+function plotCharts(hourlyData){
+  // داده‌ها برای 8 ساعت آینده
+  const hours = hourlyData.map(i=>i.dt_txt.split(" ")[1].slice(0,5));
+  const temps = hourlyData.map(i=>i.main.temp);
+  const winds = hourlyData.map(i=>i.wind.speed);
+
+  const tempTrace = {
+    x: hours,
+    y: temps,
+    type: 'scatter',
+    mode: 'lines+markers',
+    name: labels[currentLang].tempDay,
+    line: {color: '#ff6b6b'},
+  };
+  const windTrace = {
+    x: hours,
+    y: winds,
+    type: 'scatter',
+    mode: 'lines+markers',
+    name: labels[currentLang].wind,
+    line: {color: '#1e90ff'},
   };
 
-  function toggleLang() {
-    currentLang = currentLang === "fa" ? "ar" : "fa";
-    document.getElementById("title").innerText = labels[currentLang].title;
-    document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
-    document.getElementById("langToggle").innerText = currentLang === "fa" ? "AR" : "FA";
-    document.getElementById("callLink").innerText = labels[currentLang].call;
-    document.getElementById("tempTitle").innerText = labels[currentLang].tempTitle;
-    document.getElementById("windTitle").innerText = labels[currentLang].windTitle;
-    document.getElementById("humidityTitle").innerText = labels[currentLang].humidityTitle;
-  }
-
-  function degToDirection(deg) {
-    const directions = currentLang === "fa"
-      ? ["شمال", "شمال‌شرقی", "شرق", "جنوب‌شرقی", "جنوب", "جنوب‌غربی", "غرب", "شمال‌غربی"]
-      : ["شمال", "شمال شرقي", "شرق", "جنوب شرقي", "جنوب", "جنوب غربي", "غرب", "شمال غربي"];
-    return directions[Math.round(deg / 45) % 8];
-  }
-
-  async function searchCity() {
-    const city = document.getElementById("cityInput").value.trim();
-    if (!city) return;
-    try {
-      const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`);
-      const geoData = await geoRes.json();
-      if (!geoData.length) {
-        alert(labels[currentLang].cityNotFound);
-        return;
-      }
-
-      const { lat, lon, name, country } = geoData[0];
-      document.getElementById("cityName").innerText = `${name}, ${country}`;
-      document.getElementById("mapFrame").src =
-        `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.2},${lat - 0.2},${lon + 0.2},${lat + 0.2}&layer=mapnik`;
-
-      const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=${currentLang}&appid=${API_KEY}`);
-      const weatherData = await weatherRes.json();
-
-      plotData(weatherData);
-    } catch (e) {
-      alert("خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.");
-      console.error(e);
-    }
-  }
-
-  function plotData(data) {
-    // داده‌ها را مرتب کن برای ۵ روز و هر ۳ ساعت یکبار
-    const dates = [];
-    const hours = [];
-    const temps = [];
-    const winds = [];
-    const humidities = [];
-
-    data.list.forEach(item => {
-      const dateTime = item.dt_txt; // "2025-08-03 09:00:00"
-      const date = dateTime.split(" ")[0];
-      const hour = parseInt(dateTime.split(" ")[1].split(":")[0]);
-      // فقط ۵ روز اول را بگیر
-      if (!dates.includes(date) && dates.length >= 5) return;
-
-      if (!dates.includes(date)) dates.push(date);
-      hours.push(hour);
-
-      temps.push(item.main.temp);
-      winds.push(item.wind.speed);
-      humidities.push(item.main.humidity);
-    });
-
-    // محور X: ساعت، محور Y: روز (تبدیل تاریخ به عدد)، محور Z: مقدار
-    // چون ساعت و روز تکراری داریم، باید آنها را برای نمودار ۳D آماده کنیم
-    const uniqueHours = [...new Set(hours)].sort((a,b)=>a-b);
-    const uniqueDates = dates;
-
-    // داده‌ها را ماتریس کنیم (روز x ساعت)
-    function createMatrix(values) {
-      const matrix = [];
-      for(let d=0; d < uniqueDates.length; d++) {
-        matrix[d] = [];
-        for(let h=0; h < uniqueHours.length; h++) {
-          // مقدار مربوط به هر تاریخ و ساعت
-          const idx = data.list.findIndex(entry => {
-            const dt = entry.dt_txt;
-            return dt.startsWith(uniqueDates[d]) && dt.includes(`${uniqueHours[h].toString().padStart(2,'0')}:00:00`);
-          });
-          matrix[d][h] = idx !== -1 ? values[idx] : null;
-        }
-      }
-      return matrix;
-    }
-
-    const tempMatrix = createMatrix(temps);
-    const windMatrix = createMatrix(winds);
-    const humidityMatrix = createMatrix(humidities);
-
-    // تابع کمکی برای ساخت trace
-    function makeTrace(zData, name, color) {
-      return {
-        z: zData,
-        x: uniqueHours,
-        y: uniqueDates,
-        type: 'surface',
-        name: name,
-        colorscale: color,
-        showscale: true
-      };
-    }
-
-    // نمودار دما
-    Plotly.newPlot('tempPlot', [makeTrace(tempMatrix, labels[currentLang].tempTitle, 'RdBu')], {
-      title: labels[currentLang].tempTitle,
-      autosize: true,
-      scene: {
-        xaxis: {title: 'ساعت'},
-        yaxis: {title: 'تاریخ'},
-        zaxis: {title: 'درجه سانتیگراد'}
-      }
-    });
-
-    // نمودار سرعت باد
-    Plotly.newPlot('windPlot', [makeTrace(windMatrix, labels[currentLang].windTitle, 'Viridis')], {
-      title: labels[currentLang].windTitle,
-      autosize: true,
-      scene: {
-        xaxis: {title: 'ساعت'},
-        yaxis: {title: 'تاریخ'},
-        zaxis: {title: 'متر بر ثانیه'}
-      }
-    });
-
-    // نمودار رطوبت
-    Plotly.newPlot('humidityPlot', [makeTrace(humidityMatrix, labels[currentLang].humidityTitle, 'Blues')], {
-      title: labels[currentLang].humidityTitle,
-      autosize: true,
-      scene: {
-        xaxis: {title: 'ساعت'},
-        yaxis: {title: 'تاریخ'},
-        zaxis: {title: '%'}
-      }
-    });
-  }
-
-  // بارگذاری اولیه با شهر اهواز
-  window.onload = () => {
-    document.getElementById("cityInput").value = "اهواز";
-    searchCity();
+  const layout = {
+    margin: {t: 30, b: 40, l: 50, r: 20},
+    legend: {x: 0, y: 1},
+    yaxis: {title: 'مقدار'},
+    xaxis: {title: 'ساعت'},
+    font: {family: 'Vazir, sans-serif'},
+    height: 320,
+    hovermode: 'x unified',
   };
+
+  Plotly.newPlot('plots', [tempTrace, windTrace], layout, {responsive: true});
+}
+
+// بارگذاری اولیه با اهواز
+window.onload = () => {
+  document.getElementById("cityInput").value = "اهواز";
+  searchCity();
+};
 </script>
+
 </body>
 </html>
