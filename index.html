@@ -146,6 +146,11 @@
       document.getElementById("dailyTitle").innerText = labels[currentLang].forecastDaily;
     }
 
+    function degToDirection(deg) {
+      const directions = ["شمال", "شمال‌شرقی", "شرق", "جنوب‌شرقی", "جنوب", "جنوب‌غربی", "غرب", "شمال‌غربی"];
+      return directions[Math.round(deg / 45) % 8];
+    }
+
     async function searchCity() {
       const city = document.getElementById("cityInput").value.trim();
       if (!city) return;
@@ -207,7 +212,8 @@
               <img class="weather-icon" src="${iconUrl}" alt="${entry.weather[0].description}" />
               <div>${entry.main.temp.toFixed(1)}°C</div>
               <div>${entry.weather[0].description}</div>
-              <div>💨 ${entry.wind.speed} m/s</div>
+              <div>💨 ${entry.wind.speed} m/s ${degToDirection(entry.wind.deg)}</div>
+              <div>💧 رطوبت: ${entry.main.humidity}%</div>
             </div>
           `;
         }
@@ -220,13 +226,18 @@
         dailyDiv.innerHTML += `
           <div class="weather-card" title="پیش‌بینی روز و شب برای ${date}">
             <div><strong>${date}</strong></div>
+
             <div><strong>روز:</strong> ${day ? day.main.temp.toFixed(1) + "°C" : "نامشخص"}</div>
             ${day ? `<img class="weather-icon" src="${day.iconUrl}" alt="روز">` : ""}
             <div>${day ? day.weather[0].description : ""}</div>
+            <div>💨 سرعت باد: ${day ? day.wind.speed : "نامشخص"} m/s ${day ? degToDirection(day.wind.deg) : ""}</div>
+            <div>💧 رطوبت: ${day ? day.main.humidity : "نامشخص"}%</div>
 
             <div><strong>شب:</strong> ${night ? night.main.temp.toFixed(1) + "°C" : "نامشخص"}</div>
             ${night ? `<img class="weather-icon" src="${night.iconUrl}" alt="شب">` : ""}
             <div>${night ? night.weather[0].description : ""}</div>
+            <div>💨 سرعت باد: ${night ? night.wind.speed : "نامشخص"} m/s ${night ? degToDirection(night.wind.deg) : ""}</div>
+            <div>💧 رطوبت: ${night ? night.main.humidity : "نامشخص"}%</div>
           </div>
         `;
       }
