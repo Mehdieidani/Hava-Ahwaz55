@@ -3,103 +3,208 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>پیش‌بینی هواشناسی دقیق</title>
-<link href="https://cdn.jsdelivr.net/npm/vazir-font@v1.1.2/dist/font-face.css" rel="stylesheet">
+<title>پیش‌بینی هواشناسی - تم تاریک</title>
+<link href="https://cdn.jsdelivr.net/npm/vazir-font@v1.1.2/dist/font-face.css" rel="stylesheet" />
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
+  /* تم تاریک */
   body {
     font-family: Vazir, sans-serif;
-    margin: 0; padding: 0; background: #eef6fb; color: #222;
+    margin: 0; padding: 0;
+    background: #121212;
+    color: #eee;
     direction: rtl;
   }
   header {
-    background: #2196f3; color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+    background: #1f1f1f;
+    color: #66b2ff;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 0 15px #0d47a1;
   }
   header h1 {
-    margin: 0; font-size: 1.6rem;
+    margin: 0;
+    font-size: 1.8rem;
   }
   #langToggle {
-    background: white; border: none; padding: 8px 15px; border-radius: 8px; color: #2196f3; font-weight: bold;
+    background: #66b2ff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    color: #121212;
+    font-weight: bold;
     cursor: pointer;
     font-size: 1rem;
+    box-shadow: 0 0 8px #66b2ffaa;
+    transition: background 0.3s;
   }
+  #langToggle:hover {
+    background: #4a90e2;
+  }
+
   #searchSection {
-    margin: 15px 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    margin: 15px 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
   }
   #cityInput {
-    width: 260px; padding: 10px 12px; font-size: 1rem; border-radius: 8px; border: 1.5px solid #2196f3;
+    width: 260px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1.5px solid #66b2ff;
     outline: none;
+    background: #222;
+    color: #eee;
+  }
+  #cityInput::placeholder {
+    color: #aaa;
   }
   #searchBtn {
-    background: #2196f3; border: none; padding: 10px 18px; border-radius: 8px; color: white; font-weight: bold;
+    background: #66b2ff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    color: #121212;
+    font-weight: bold;
     cursor: pointer;
     font-size: 1rem;
+    box-shadow: 0 0 8px #66b2ffaa;
+    transition: background 0.3s;
+  }
+  #searchBtn:hover {
+    background: #4a90e2;
   }
   #cityName {
-    margin: 12px auto; text-align: center; font-size: 1.3rem; font-weight: bold; color: #0b3d91;
+    margin: 12px auto;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #88c0ff;
   }
   #mapFrame {
-    display: block; margin: 10px auto; border-radius: 12px; border: none;
-    width: 90vw; max-width: 600px; height: 280px;
+    display: block;
+    margin: 10px auto 20px;
+    border-radius: 12px;
+    border: none;
+    width: 90vw;
+    max-width: 600px;
+    height: 280px;
+    box-shadow: 0 0 15px #2196f3aa;
   }
+
   /* پیش‌بینی ۵ روزه */
   #dailyForecast {
-    display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; padding: 15px 10px;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 15px 10px;
   }
   .day-card {
-    background: white; border-radius: 16px; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-    width: 120px; padding: 10px 10px 18px; text-align: center;
-    font-size: 0.95rem;
-  }
-  .day-card h3 {
-    margin: 6px 0 10px; font-weight: bold; font-size: 1.1rem;
-  }
-  .day-icon {
-    width: 64px; height: 64px;
-  }
-  .temp-day, .temp-night {
-    margin: 6px 0; font-weight: 600;
-  }
-  /* پیش‌بینی ساعتی */
-  #hourlyForecast {
-    margin: 20px auto; max-width: 95vw; overflow-x: auto; padding-bottom: 10px;
-  }
-  #hourlyForecast .hour-card {
-    display: inline-block; background: white; border-radius: 14px; padding: 10px 14px; margin: 0 8px;
-    width: 110px; box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    text-align: center; font-size: 0.9rem;
-  }
-  .hour-time {
-    font-weight: bold; margin-bottom: 8px;
-  }
-  .hour-icon {
-    width: 40px; height: 40px;
-  }
-  .hour-temp {
-    margin: 6px 0; font-weight: 600;
-  }
-  .hour-desc {
-    font-size: 0.85rem; color: #555;
-  }
-  .hour-wind, .hour-humidity {
-    font-size: 0.8rem; color: #777; margin-top: 4px;
-  }
-  /* نمودار دما و باد */
-  #plots {
-    margin: 30px auto; max-width: 650px;
-  }
-  /* تبلیغات تماس */
-  .ad-box {
-    position: fixed; bottom: 15px; left: 15px;
-    background: #fdf5e6; border: 2px solid #f39c12; border-radius: 14px;
-    padding: 8px 14px; font-weight: bold; color: #b35e00;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    background: #222;
+    border-radius: 16px;
+    box-shadow: 0 0 10px #0d47a1aa;
+    width: 130px;
+    padding: 14px 12px 20px;
+    text-align: center;
+    font-size: 1rem;
     cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s;
     user-select: none;
   }
-  .ad-box a {
-    color: #b35e00; text-decoration: none;
+  .day-card:hover, .day-card.active {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px #66b2ffcc;
   }
+  .day-card h3 {
+    margin: 6px 0 10px;
+    font-weight: 700;
+  }
+  .day-icon {
+    width: 64px;
+    height: 64px;
+  }
+  .temp-day, .temp-night {
+    margin: 6px 0;
+    font-weight: 600;
+  }
+
+  /* پیش‌بینی ساعتی */
+  #hourlyForecast {
+    margin: 20px auto;
+    max-width: 95vw;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    border-top: 1px solid #444;
+    padding-top: 15px;
+    display: none;
+  }
+  #hourlyForecast .hour-card {
+    display: inline-block;
+    background: #222;
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin: 0 8px;
+    width: 120px;
+    box-shadow: 0 0 12px #66b2ffaa;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  .hour-time {
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #a0c4ff;
+  }
+  .hour-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .hour-temp {
+    margin: 6px 0;
+    font-weight: 600;
+  }
+  .hour-desc {
+    font-size: 0.85rem;
+    color: #ccc;
+  }
+  .hour-wind, .hour-humidity {
+    font-size: 0.8rem;
+    color: #bbb;
+    margin-top: 4px;
+  }
+
+  /* نمودار دما و باد */
+  #plots {
+    margin: 35px auto 50px;
+    max-width: 700px;
+  }
+
+  /* تبلیغات تماس */
+  .ad-box {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    background: #333;
+    border: 2px solid #66b2ff;
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-weight: bold;
+    color: #66b2ff;
+    box-shadow: 0 0 20px #66b2ffaa;
+    cursor: pointer;
+    user-select: none;
+    z-index: 1000;
+  }
+  .ad-box a {
+    color: #66b2ff;
+    text-decoration: none;
+  }
+
   @media (max-width: 480px) {
     #dailyForecast {
       justify-content: center;
@@ -184,6 +289,7 @@ function toggleLang(){
   renderForecast(lastWeatherData);
 }
 
+// تبدیل درجه باد به جهت فارسی یا عربی
 function degToDir(deg){
   const d = labels[currentLang].directionLabels;
   return d[Math.round(deg / 45) % 8];
@@ -219,10 +325,15 @@ async function searchCity(){
 function renderForecast(data){
   if(!data) return;
 
+  // پاک کردن انتخاب قبلی ساعت ها
+  selectedDay = null;
+  document.getElementById("hourlyForecast").style.display = "none";
+  document.getElementById("hourlyForecast").innerHTML = "";
+
   // پیش‌بینی ۵ روزه
   const dailySection = document.getElementById("dailyForecast");
   dailySection.innerHTML = `<h2 style="text-align:center;margin-bottom:12px;">${labels[currentLang].dailyTitle}</h2>`;
-  // دسته بندی روزها
+
   let dailyMap = {};
   data.list.forEach(item=>{
     const date = item.dt_txt.split(" ")[0];
@@ -232,7 +343,6 @@ function renderForecast(data){
   const days = Object.keys(dailyMap).slice(0,5);
 
   days.forEach(day => {
-    // میانگین دمای روز و شب
     const dayTemps = dailyMap[day].filter(i=> {
       const hour = parseInt(i.dt_txt.split(" ")[1].split(":")[0]);
       return hour >= 6 && hour <= 18;
@@ -241,16 +351,13 @@ function renderForecast(data){
       const hour = parseInt(i.dt_txt.split(" ")[1].split(":")[0]);
       return hour < 6 || hour > 18;
     });
-
     const avgDayTemp = dayTemps.reduce((a,b)=>a+b.main.temp,0)/dayTemps.length || 0;
     const avgNightTemp = nightTemps.reduce((a,b)=>a+b.main.temp,0)/nightTemps.length || 0;
-    // آیکون غالب روز
     const dayIcon = dayTemps.length ? dayTemps[0].weather[0].icon : dailyMap[day][0].weather[0].icon;
-    // توضیح غالب روز
     const dayDesc = dayTemps.length ? dayTemps[0].weather[0].description : dailyMap[day][0].weather[0].description;
 
     dailySection.innerHTML += `
-      <div class="day-card">
+      <div class="day-card" data-day="${day}" onclick="showHourly('${day}')">
         <h3>${day}</h3>
         <img src="https://openweathermap.org/img/wn/${dayIcon}@2x.png" alt="weather icon" class="day-icon" />
         <div class="temp-day">${labels[currentLang].tempDay}: ${avgDayTemp.toFixed(1)}°C</div>
@@ -260,13 +367,30 @@ function renderForecast(data){
     `;
   });
 
-  // پیش‌بینی ساعتی
-  const hourlySection = document.getElementById("hourlyForecast");
-  hourlySection.innerHTML = `<h2 style="text-align:center;margin-bottom:12px;">${labels[currentLang].hourlyTitle}</h2>`;
-  // فقط 24 ساعت آینده
-  const next24 = data.list.slice(0,8);
+  // نمودار دما و باد کل 5 روز (هر 3 ساعت)
+  plotCharts(data.list);
 
-  next24.forEach(item=>{
+}
+
+let selectedDay = null;
+
+function showHourly(day){
+  if(selectedDay === day){
+    // دوباره کلیک روی همون روز پیش بینی ساعتی رو مخفی کن
+    selectedDay = null;
+    document.getElementById("hourlyForecast").style.display = "none";
+    return;
+  }
+  selectedDay = day;
+
+  const hourlySection = document.getElementById("hourlyForecast");
+  hourlySection.style.display = "block";
+  hourlySection.innerHTML = `<h2 style="text-align:center;margin-bottom:12px;">${labels[currentLang].hourlyTitle} - ${day}</h2>`;
+
+  // فیلتر فقط ساعت‌های آن روز
+  const hours = lastWeatherData.list.filter(item => item.dt_txt.startsWith(day));
+
+  hours.forEach(item=>{
     const hour = item.dt_txt.split(" ")[1].slice(0,5);
     const windDir = degToDir(item.wind.deg);
     hourlySection.innerHTML += `
@@ -280,42 +404,59 @@ function renderForecast(data){
       </div>
     `;
   });
-
-  // نمودار دما و باد
-  plotCharts(next24);
 }
 
-function plotCharts(hourlyData){
-  // داده‌ها برای 8 ساعت آینده
-  const hours = hourlyData.map(i=>i.dt_txt.split(" ")[1].slice(0,5));
-  const temps = hourlyData.map(i=>i.main.temp);
-  const winds = hourlyData.map(i=>i.wind.speed);
+function plotCharts(dataList){
+  const hours = dataList.map(i => i.dt_txt.replace(" ", "\n"));
+  const temps = dataList.map(i => i.main.temp);
+  const winds = dataList.map(i => i.wind.speed);
 
   const tempTrace = {
     x: hours,
     y: temps,
+    name: labels[currentLang].tempDay + " (°C)",
     type: 'scatter',
     mode: 'lines+markers',
-    name: labels[currentLang].tempDay,
-    line: {color: '#ff6b6b'},
+    line: { color: '#ff6b6b' },
   };
+
   const windTrace = {
     x: hours,
     y: winds,
+    name: labels[currentLang].wind + " (m/s)",
     type: 'scatter',
     mode: 'lines+markers',
-    name: labels[currentLang].wind,
-    line: {color: '#1e90ff'},
+    line: { color: '#1e90ff' },
+    yaxis: 'y2'
   };
 
   const layout = {
-    margin: {t: 30, b: 40, l: 50, r: 20},
-    legend: {x: 0, y: 1},
-    yaxis: {title: 'مقدار'},
-    xaxis: {title: 'ساعت'},
-    font: {family: 'Vazir, sans-serif'},
-    height: 320,
+    title: '',
+    font: {family: 'Vazir, sans-serif', color: '#eee'},
+    plot_bgcolor: '#222',
+    paper_bgcolor: '#222',
+    legend: {x: 0, y: 1, font: {color: '#eee'}},
+    margin: {t: 20, b: 60, l: 60, r: 60},
+    height: 360,
     hovermode: 'x unified',
+    yaxis: {
+      title: labels[currentLang].tempDay + ' (°C)',
+      color: '#ff6b6b',
+      zerolinecolor: '#555'
+    },
+    yaxis2: {
+      title: labels[currentLang].wind + ' (m/s)',
+      overlaying: 'y',
+      side: 'right',
+      color: '#1e90ff',
+      zerolinecolor: '#555'
+    },
+    xaxis: {
+      title: labels[currentLang].hourlyTitle,
+      tickangle: -45,
+      color: '#ccc',
+      tickfont: {size: 10}
+    }
   };
 
   Plotly.newPlot('plots', [tempTrace, windTrace], layout, {responsive: true});
