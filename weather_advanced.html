@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>وضعیت آب‌وهوا</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #eee;
+      font-family: "Vazirmatn", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header, .settings {
+      padding: 1rem;
+      text-align: center;
+      background: #222;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .search-bar {
+      margin: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    input, button {
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.4rem;
+    }
+    input {
+      flex: 1;
+      max-width: 300px;
+    }
+    button {
+      background-color: #444;
+      color: #fff;
+      cursor: pointer;
+    }
+    .forecast-day {
+      background: #1e1e1e;
+      border-radius: 10px;
+      margin: 1rem;
+      padding: 1rem;
+      cursor: pointer;
+    }
+    .forecast-day:hover {
+      background: #2c2c2c;
+    }
+    .details {
+      display: none;
+      margin-top: 1rem;
+      background: #2a2a2a;
+      border-radius: 10px;
+      padding: 0.5rem;
+    }
+    .weather-icon {
+      width: 60px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #aaa;
+      margin: 2rem 0;
+    }
+    .settings {
+      font-size: 0.9rem;
+      background: #191919;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="pageTitle">وضعیت آب‌وهوا</h1>
+  </header>
+
+  <div class="search-bar">
+    <input type="text" id="cityInput" placeholder="نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)" />
+    <button onclick="searchCity()">جستجو</button>
+    <button onclick="toggleLang()">AR</button>
+  </div>
+
+  <div class="settings">
+    <label>🌡 واحد دما:
+      <select id="unitSelect" onchange="searchCity()">
+        <option value="metric">سلسیوس</option>
+        <option value="imperial">فارنهایت</option>
+      </select>
+    </label>
+  </div>
+
+  <div id="forecastContainer"></div>
+
+  <div class="footer">
+    <p>📞 <a href="tel:09332356547" style="color:lime">تماس با 09332356547</a></p>
+    <p>📧 <a href="mailto:mehdi1eidani@gmail.com" style="color:skyblue">mehdi1eidani@gmail.com</a></p>
+    <p>📸 <a href="https://instagram.com/mehdi.eidani" target="_blank" style="color:#f66">اینستاگرام @mehdi.eidani</a></p>
+  </div>
+
+  <script>
+    const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88";
+    let currentLang = "fa";
+
+    const labels = {
+      fa: {
+        title: "وضعیت آب‌وهوا",
+        placeholder: "نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)",
+        unit: "سلسیوس",
+        min: "کمینه",
+        max: "بیشینه",
+        wind: "باد",
+        hum: "رطوبت",
+        pres: "فشار",
+        desc: "وضعیت",
+      },
+      ar: {
+        title: "حالة الطقس",
+        placeholder: "اسم المدينة أو القرية",
+        unit: "مئوية",
+        min: "الحد الأدنى",
+        max: "الحد الأقصى",
+        wind: "الرياح",
+        hum: "الرطوبة",
+        pres: "الضغط",
+        desc: "الوصف",
+      }
+    };
+
+    function toggleLang() {
+      currentLang = currentLang === "fa" ? "ar" : "fa";
+      document.getElementById("pageTitle").innerText = labels[currentLang].title;
+      document.getElementById("cityInput").placeholder = labels[currentLang].placeholder;
+      searchCity();
+    }
+
+    async function searchCity() {
+      const city = document.getElementById("cityInput").value.trim();
+      if (!city) return;
+      const unit = document.getElementById("unitSelect").value;
+      try {
+        const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`);
+        const geoData = await geoRes.json();
+        if (!geoData.length) return alert("شهر پیدا نشد");
+
+        const { lat, lon } = geoData[0];
+        const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${unit}&lang=${currentLang}&appid=${API_KEY}`);
+        const forecastData = await forecastRes.json();
+
+        renderForecast(forecastData);
+      } catch (e) {
+        alert("خطا در دریافت اطلاعات");
+      }
+    }
+
+    function renderForecast(data) {
+      const container = document.getElementById("forecastContainer");
+      container.innerHTML = "";
+      const dailyMap = {};
+
+      data.list.forEach(item => {
+        const date = item.dt_txt.split(" ")[0];
+        if (!dailyMap[date]) dailyMap[date] = [];
+        dailyMap[date].push(item);
+      });
+
+      Object.entries(dailyMap).forEach(([date, entries]) => {
+        const min = Math.min(...entries.map(e => e.main.temp_min));
+        const max = Math.max(...entries.map(e => e.main.temp_max));
+        const icon = entries[0].weather[0].icon;
+        const desc = entries[0].weather[0].description;
+
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "forecast-day";
+        dayDiv.innerHTML = `
+          <div><strong>${date}</strong> | ${labels[currentLang].desc}: ${desc}</div>
+          <div><img src="https://openweathermap.org/img/wn/${icon}@2x.png" class="weather-icon" /></div>
+          <div>${labels[currentLang].min}: ${min.toFixed(1)}°, ${labels[currentLang].max}: ${max.toFixed(1)}°</div>
+          <div class="details"></div>
+        `;
+
+        dayDiv.onclick = () => {
+          const detailDiv = dayDiv.querySelector(".details");
+          if (detailDiv.style.display === "block") {
+            detailDiv.style.display = "none";
+            detailDiv.innerHTML = "";
+          } else {
+            detailDiv.style.display = "block";
+            detailDiv.innerHTML = entries.map(e => `
+              <div style="margin: 0.5rem 0; border-bottom: 1px solid #333;">
+                🕒 ${e.dt_txt.split(" ")[1].slice(0,5)} |
+                🌡 ${e.main.temp.toFixed(1)}° |
+                💧 ${labels[currentLang].hum}: ${e.main.humidity}% |
+                🔻 ${labels[currentLang].pres}: ${e.main.pressure} hPa |
+                🌬 ${labels[currentLang].wind}: ${e.wind.speed} m/s ↗️ ${e.wind.deg}° |
+                ☁️ ${labels[currentLang].desc}: ${e.weather[0].description}
+              </div>
+            `).join("");
+          }
+        };
+
+        container.appendChild(dayDiv);
+      });
+    }
+
+    window.onload = () => {
+      document.getElementById("cityInput").value = "اهواز";
+      searchCity();
+    };
+  </script>
+</body>
+</html>
