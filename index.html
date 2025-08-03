@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>هواشناسی حرفه‌ای</title>
+<title>هواشناسی حرفه‌ای - پیش‌بینی روز و شب</title>
 <link href="https://cdn.jsdelivr.net/npm/vazir-font@v1.1.2/dist/font-face.css" rel="stylesheet" />
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-oGZj6j7l75Qo6Sj01WZb2n08+36a3L8aV7Qw+iYXF0k="
   crossorigin=""
 />
 <style>
@@ -17,6 +18,9 @@
     background: linear-gradient(to top, #001529, #0a2749);
     color: #eee;
     direction: rtl;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
   header {
     background-color: #003366;
@@ -44,6 +48,7 @@
     flex-wrap: wrap;
     padding: 1rem;
     gap: 1rem;
+    flex: 1;
   }
   #leftPanel {
     flex: 1 1 320px;
@@ -51,6 +56,8 @@
     background: #013a63;
     border-radius: 12px;
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
   }
   #searchSection {
     display: flex;
@@ -75,6 +82,7 @@
   }
   #favorites {
     margin-bottom: 1rem;
+    flex-wrap: wrap;
   }
   #favorites button {
     background: #00509e;
@@ -84,6 +92,7 @@
     padding: 0.4rem 0.8rem;
     border-radius: 8px;
     cursor: pointer;
+    white-space: nowrap;
   }
   #favorites button:hover {
     background: #1a73e8;
@@ -116,12 +125,15 @@
     gap: 0.7rem;
     margin-top: 1rem;
     font-size: 0.9rem;
+    text-align: right;
   }
   #forecastContainer {
     background: #013a63;
     flex: 2 1 600px;
     border-radius: 12px;
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
   }
   #dailyForecast {
     display: flex;
@@ -137,6 +149,7 @@
     cursor: pointer;
     user-select: none;
     transition: background 0.3s;
+    text-align: center;
   }
   .day-card.active,
   .day-card:hover {
@@ -145,7 +158,6 @@
   .day-card h3 {
     margin: 0;
     font-size: 1rem;
-    text-align: center;
   }
   .day-card img {
     display: block;
@@ -153,18 +165,38 @@
     width: 60px;
     height: 60px;
   }
-  .day-card .temp {
-    font-size: 1.2rem;
-    text-align: center;
+  .day-card .temp-day,
+  .day-card .temp-night {
+    font-size: 1rem;
     font-weight: 700;
+    margin-top: 0.2rem;
   }
   #hourlyForecast {
     margin-top: 1rem;
-    max-height: 320px;
+    max-height: 400px;
     overflow-y: auto;
     background: #01497c;
     border-radius: 12px;
     padding: 1rem;
+  }
+  .hour-group {
+    margin-bottom: 1rem;
+  }
+  .hour-group-header {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 0.4rem;
+    background: #00509e;
+    border-radius: 6px;
+    user-select: none;
+    margin-bottom: 0.5rem;
+  }
+  .hour-group-content {
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 6px;
   }
   .hour-card {
     display: flex;
@@ -183,6 +215,7 @@
   }
   .hour-info div {
     margin-bottom: 0.2rem;
+    font-size: 0.9rem;
   }
   .detail-label {
     font-weight: 700;
@@ -229,6 +262,16 @@
   #hourlyForecast::-webkit-scrollbar-track {
     background: #013a63;
   }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    main {
+      flex-direction: column;
+    }
+    #forecastContainer {
+      max-width: 100%;
+    }
+  }
 </style>
 </head>
 <body>
@@ -262,6 +305,7 @@
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-oW7l7NhKX0iSXXEe4BfPvvCJS8+PpL3e2pA6cd9vXNk="
   crossorigin="">
 </script>
 <script>
@@ -276,7 +320,8 @@
       title: "وضعیت آب‌وهوا",
       searchPlaceholder: "نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)",
       searchBtn: "جستجو",
-      hourlyTitle: "پیش‌بینی ساعتی",
+      hourlyTitleDay: "پیش‌بینی ساعتی روز",
+      hourlyTitleNight: "پیش‌بینی ساعتی شب",
       temp: "دما",
       humidity: "رطوبت",
       pressure: "فشار هوا",
@@ -300,12 +345,15 @@
       dewPoint: "نقطه شبنم",
       clouds: "ابرها",
       description: "توضیحات",
+      day: "روز",
+      night: "شب"
     },
     ar: {
       title: "حالة الطقس",
       searchPlaceholder: "أدخل اسم المدينة أو القرية",
       searchBtn: "بحث",
-      hourlyTitle: "توقعات كل ساعة",
+      hourlyTitleDay: "توقعات الساعة في النهار",
+      hourlyTitleNight: "توقعات الساعة في الليل",
       temp: "درجة الحرارة",
       humidity: "الرطوبة",
       pressure: "الضغط الجوي",
@@ -329,6 +377,8 @@
       dewPoint: "نقطة الندى",
       clouds: "الغيوم",
       description: "الوصف",
+      day: "نهار",
+      night: "ليل"
     }
   };
 
@@ -435,39 +485,28 @@
     const sunsetStr = sunset.toLocaleTimeString(currentLang === "fa" ? "fa-IR" : "ar-EG", {hour: "2-digit", minute: "2-digit"});
 
     let aqiText = "";
-    let aqiColor = "";
     if (aqiData && aqiData.list && aqiData.list.length) {
       const aqi = aqiData.list[0].main.aqi;
-      switch (aqi) {
-        case 1: aqiText = currentLang === "fa" ? "خوب" : "جيد"; aqiColor = "green"; break;
-        case 2: aqiText = currentLang === "fa" ? "معمولی" : "متوسط"; aqiColor = "yellow"; break;
-        case 3: aqiText = currentLang === "فا" ? "ناسالم برای گروه‌های حساس" : "غير صحي للمجموعات الحساسة"; aqiColor = "orange"; break;
-        case 4: aqiText = currentLang === "fa" ? "ناسالم" : "غير صحي"; aqiColor = "red"; break;
-        case 5: aqiText = currentLang === "fa" ? "بسیار ناسالم" : "سيء جدا"; aqiColor = "purple"; break;
-      }
+      const aqiMapFa = ["خوب", "نسبتا خوب", "متوسط", "بد", "بسیار بد"];
+      const aqiMapAr = ["جيد", "جيد إلى حد ما", "متوسط", "سيء", "سيء جدا"];
+      const aqiMap = currentLang === "fa" ? aqiMapFa : aqiMapAr;
+      aqiText = `${labels[currentLang].aqi}: ${aqiMap[aqi-1]}`;
     }
-
-    const feelsLike = currentData.main.feels_like.toFixed(1);
-    const dewPoint = (currentData.main.temp - ((100 - humidity) / 5)).toFixed(1);
-    const clouds = currentData.clouds.all;
 
     container.innerHTML = `
       <h2>${cityName}</h2>
       <img src="${iconUrl}" alt="${desc}" />
-      <div class="temp">${temp} °C</div>
+      <div class="temp">${temp}°C</div>
       <div class="desc">${desc}</div>
       <div class="details">
-        <div><strong>${labels[currentLang].humidity}:</strong> ${humidity}%</div>
-        <div><strong>${labels[currentLang].pressure}:</strong> ${pressure} hPa</div>
-        <div><strong>${labels[currentLang].windSpeed}:</strong> ${windSpeed} m/s</div>
-        <div><strong>${labels[currentLang].windDir}:</strong> ${degToDirection(windDeg)}</div>
-        <div><strong>${labels[currentLang].visibility}:</strong> ${visibility} km</div>
-        <div><strong>${labels[currentLang].sunrise}:</strong> ${sunriseStr}</div>
-        <div><strong>${labels[currentLang].sunset}:</strong> ${sunsetStr}</div>
-        <div><strong>${labels[currentLang].aqi}:</strong> <span style="color:${aqiColor}">${aqiText}</span></div>
-        <div><strong>${labels[currentLang].feelsLike}:</strong> ${feelsLike} °C</div>
-        <div><strong>${labels[currentLang].dewPoint}:</strong> ${dewPoint} °C</div>
-        <div><strong>${labels[currentLang].clouds}:</strong> ${clouds}%</div>
+        <div><span class="detail-label">${labels[currentLang].humidity}:</span> ${humidity}%</div>
+        <div><span class="detail-label">${labels[currentLang].pressure}:</span> ${pressure} hPa</div>
+        <div><span class="detail-label">${labels[currentLang].windSpeed}:</span> ${windSpeed} m/s</div>
+        <div><span class="detail-label">${labels[currentLang].windDir}:</span> ${degToDirection(windDeg)}</div>
+        <div><span class="detail-label">${labels[currentLang].visibility}:</span> ${visibility.toFixed(1)} km</div>
+        <div><span class="detail-label">${labels[currentLang].sunrise}:</span> ${sunriseStr}</div>
+        <div><span class="detail-label">${labels[currentLang].sunset}:</span> ${sunsetStr}</div>
+        <div>${aqiText}</div>
       </div>
       <button onclick="toggleFavorite('${currentData.name}')">
         ${favorites.includes(currentData.name) ? labels[currentLang].removeFav : labels[currentLang].addFav}
@@ -475,101 +514,236 @@
     `;
   }
 
-  function renderForecast(weatherData) {
-    if (!weatherData) return;
-    // پیش‌بینی روزانه (تقسیم بندی هر 8 داده هر 24 ساعت)
-    const dailyDiv = document.getElementById("dailyForecast");
-    dailyDiv.innerHTML = "";
+  // گروه‌بندی داده‌های پیش‌بینی به روز و شب
+  function groupForecastByDayNight(forecastList, sunriseTimestamp, sunsetTimestamp) {
+    // sunriseTimestamp و sunsetTimestamp به ثانیه یونیکس هستند
+    // روز = از طلوع تا غروب، شب = بقیه ساعات
+    const dayData = [];
+    const nightData = [];
 
-    // مرتب کردن و جداسازی داده‌ها به روزها
-    let dailyData = {};
+    forecastList.forEach(item => {
+      const time = item.dt;
+      // اگر زمان داخل بازه طلوع تا غروب باشد روز است
+      if (time >= sunriseTimestamp && time < sunsetTimestamp) {
+        dayData.push(item);
+      } else {
+        nightData.push(item);
+      }
+    });
+    return { dayData, nightData };
+  }
+
+  function calcAverage(dataArray, key) {
+    if (!dataArray.length) return null;
+    const sum = dataArray.reduce((acc, cur) => acc + cur.main[key], 0);
+    return (sum / dataArray.length).toFixed(1);
+  }
+
+  function renderForecast(weatherData) {
+    if (!weatherData || !weatherData.list || !weatherData.city) return;
+
+    const dailyDiv = document.getElementById("dailyForecast");
+    const hourlyDiv = document.getElementById("hourlyForecast");
+    dailyDiv.innerHTML = "";
+    hourlyDiv.innerHTML = "";
+
+    // گروه‌بندی داده‌ها بر اساس روز
+    const daysMap = new Map();
     weatherData.list.forEach(item => {
-      const date = item.dt_txt.split(" ")[0];
-      if (!dailyData[date]) dailyData[date] = [];
-      dailyData[date].push(item);
+      const dateStr = new Date(item.dt * 1000).toISOString().slice(0, 10);
+      if (!daysMap.has(dateStr)) daysMap.set(dateStr, []);
+      daysMap.get(dateStr).push(item);
     });
 
-    // ایجاد کارت‌های روزانه
-    let dayIndex = 0;
-    for (const [date, items] of Object.entries(dailyData)) {
-      if (dayIndex >= 5) break; // فقط 5 روز آینده
+    // آیکون‌ها برای هر روز بر اساس میانگین روز و شب
+    const daysArr = Array.from(daysMap.entries());
 
-      // میانگین دما و آیکون روزانه
-      const temps = items.map(i => i.main.temp);
-      const avgTemp = (temps.reduce((a,b) => a+b, 0) / temps.length).toFixed(1);
+    // طلوع و غروب خورشید روز اول (برای تفکیک روز و شب)
+    const sunrise = weatherData.city.sunrise || weatherData.list[0].sys?.sunrise || 0;
+    const sunset = weatherData.city.sunset || weatherData.list[0].sys?.sunset || 0;
 
-      const icon = items[0].weather[0].icon;
-      const desc = items[0].weather[0].description;
+    // ساخت کارت‌های روزانه
+    daysArr.forEach(([date, items], idx) => {
+      // برای هر روز میانگین دمای روز و شب جداگانه
+      // چون API ممکن طلوع و غروب رو دقیق نده، ما طلوع و غروب رو از داده‌ها استخراج می‌کنیم:
+      // برای هر روز طلوع و غروب رو جداگانه محاسبه می‌کنیم (اگه داده موجود بود)
+      // ساده‌تر: از همان طلوع و غروب روز اول استفاده می‌کنیم (کمی خطا داره ولی کافی است)
 
-      const dayName = new Date(date).toLocaleDateString(currentLang === "fa" ? "fa-IR" : "ar-EG", { weekday: "short" });
+      // گروه‌بندی به روز و شب
+      // برای هر آیتم ساعت دقیق داریم، پس می‌تونیم با ساعت طلوع و غروب ساعتش رو مقایسه کنیم
+      const dateObj = new Date(date + "T00:00:00");
+      // طلوع و غروب آن روز (اگر موجود باشد) را بگیریم (در صورت نبودن، از روز اول استفاده می‌کنیم)
+      let sr = sunrise;
+      let ss = sunset;
+
+      // گروه‌بندی آیتم‌ها به روز و شب
+      const { dayData, nightData } = groupForecastByDayNight(items, sr, ss);
+
+      // میانگین دما روز و شب
+      const avgDayTemp = calcAverage(dayData, "temp") ?? "-";
+      const avgNightTemp = calcAverage(nightData, "temp") ?? "-";
+
+      // آیکون میانگین دمای روز یا شب برای نمایش کارت (اگر دمای روز موجود بود، آیکون روز را نشان می‌دهیم، در غیر این صورت آیکون شب)
+      const iconCode = dayData.length > 0 ? dayData[0].weather[0].icon : (nightData.length > 0 ? nightData[0].weather[0].icon : "01d");
+
+      const dateObjLocale = new Date(date + "T00:00:00");
+      const optionsFa = { weekday: "short", day: "numeric", month: "numeric" };
+      const optionsAr = { weekday: "short", day: "numeric", month: "numeric" };
+      const dayName = dateObjLocale.toLocaleDateString(currentLang === "fa" ? "fa-IR" : "ar-EG", currentLang === "fa" ? optionsFa : optionsAr);
 
       const card = document.createElement("div");
       card.className = "day-card";
-      if(dayIndex === 0) card.classList.add("active");
-      card.dataset.date = date;
-
+      card.dataset.index = idx;
       card.innerHTML = `
         <h3>${dayName}</h3>
-        <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}" />
-        <div class="temp">${avgTemp} °C</div>
+        <img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="weather" />
+        <div class="temp-day">${labels[currentLang].day}: ${avgDayTemp}°C</div>
+        <div class="temp-night">${labels[currentLang].night}: ${avgNightTemp}°C</div>
       `;
-
-      card.onclick = () => renderHourly(date, dailyData[date]);
-
+      card.onclick = () => showHourlyForecast(items, idx);
       dailyDiv.appendChild(card);
-      dayIndex++;
-    }
+    });
 
-    // به طور پیش فرض اولین روز انتخاب شده و ساعت‌ها نمایش داده شوند
-    const firstDate = Object.keys(dailyData)[0];
-    if(firstDate) renderHourly(firstDate, dailyData[firstDate]);
+    // خودکار نمایش پیش‌بینی اولین روز
+    if (daysArr.length) showHourlyForecast(daysArr[0][1], 0);
   }
 
-  function renderHourly(date, hourlyList) {
+  // نمایش پیش‌بینی ساعتی به صورت جداگانه روز و شب با دکمه باز/بسته شدن
+  function showHourlyForecast(dayItems, dayIndex) {
     const hourlyDiv = document.getElementById("hourlyForecast");
-    hourlyDiv.innerHTML = `<h3>${labels[currentLang].hourlyTitle} - ${new Date(date).toLocaleDateString(currentLang === "fa" ? "fa-IR" : "ar-EG")}</h3>`;
-    hourlyList.forEach(hour => {
-      const time = hour.dt_txt.split(" ")[1].slice(0,5);
-      const icon = hour.weather[0].icon;
-      const desc = hour.weather[0].description;
-      const temp = hour.main.temp.toFixed(1);
-      const windSpeed = hour.wind.speed.toFixed(1);
-      const windDir = degToDirection(hour.wind.deg);
+    hourlyDiv.innerHTML = "";
 
+    // حذف کلاس فعال از کارت‌های روزانه و فعال کردن کارت فعلی
+    document.querySelectorAll(".day-card").forEach(card => card.classList.remove("active"));
+    const activeCard = document.querySelector(`.day-card[data-index='${dayIndex}']`);
+    if (activeCard) activeCard.classList.add("active");
+
+    if (!dayItems.length) return;
+
+    // برای تفکیک روز و شب باید طلوع و غروب داشته باشیم
+    // اگر داده طلوع و غروب نداشتیم از ساعت 6 صبح و 18 عصر به عنوان مرز روز و شب استفاده می‌کنیم
+    const sunriseTimestamp = dayItems[0].sys?.sunrise || (new Date(dayItems[0].dt * 1000).setHours(6, 0, 0, 0) / 1000);
+    const sunsetTimestamp = dayItems[0].sys?.sunset || (new Date(dayItems[0].dt * 1000).setHours(18, 0, 0, 0) / 1000);
+
+    // گروه‌بندی داده‌ها به روز و شب
+    const { dayData, nightData } = groupForecastByDayNight(dayItems, sunriseTimestamp, sunsetTimestamp);
+
+    // ایجاد گروه روز
+    const dayGroup = document.createElement("div");
+    dayGroup.className = "hour-group";
+    const dayHeader = document.createElement("div");
+    dayHeader.className = "hour-group-header";
+    dayHeader.textContent = labels[currentLang].hourlyTitleDay;
+    dayGroup.appendChild(dayHeader);
+
+    const dayContent = document.createElement("div");
+    dayContent.className = "hour-group-content";
+    dayGroup.appendChild(dayContent);
+
+    dayHeader.onclick = () => {
+      dayContent.style.display = dayContent.style.display === "block" ? "none" : "block";
+    };
+
+    // پر کردن اطلاعات ساعتی روز
+    dayData.forEach(item => {
+      const hourCard = createHourCard(item);
+      dayContent.appendChild(hourCard);
+    });
+
+    // ایجاد گروه شب
+    const nightGroup = document.createElement("div");
+    nightGroup.className = "hour-group";
+    const nightHeader = document.createElement("div");
+    nightHeader.className = "hour-group-header";
+    nightHeader.textContent = labels[currentLang].hourlyTitleNight;
+    nightGroup.appendChild(nightHeader);
+
+    const nightContent = document.createElement("div");
+    nightContent.className = "hour-group-content";
+    nightGroup.appendChild(nightContent);
+
+    nightHeader.onclick = () => {
+      nightContent.style.display = nightContent.style.display === "block" ? "none" : "block";
+    };
+
+    // پر کردن اطلاعات ساعتی شب
+    nightData.forEach(item => {
+      const hourCard = createHourCard(item);
+      nightContent.appendChild(hourCard);
+    });
+
+    hourlyDiv.appendChild(dayGroup);
+    hourlyDiv.appendChild(nightGroup);
+
+    // باز بودن پیش‌فرض گروه روز و بسته بودن شب
+    dayContent.style.display = "block";
+    nightContent.style.display = "none";
+  }
+
+  function createHourCard(item) {
+    const date = new Date(item.dt * 1000);
+    const timeStr = date.toLocaleTimeString(currentLang === "fa" ? "fa-IR" : "ar-EG", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    return (() => {
       const card = document.createElement("div");
       card.className = "hour-card";
-      card.innerHTML = `
-        <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${desc}" />
-        <div class="hour-info">
-          <div><strong>${time}</strong></div>
-          <div>${desc}</div>
-          <div><strong>${labels[currentLang].temp}:</strong> ${temp} °C</div>
-          <div><strong>${labels[currentLang].windSpeed}:</strong> ${windSpeed} m/s (${windDir})</div>
-        </div>
-      `;
-      hourlyDiv.appendChild(card);
-    });
 
-    // تغییر وضعیت فعال کارت روزانه
-    document.querySelectorAll(".day-card").forEach(card => {
-      card.classList.toggle("active", card.dataset.date === date);
-    });
+      const icon = document.createElement("img");
+      icon.src = `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`;
+      icon.alt = item.weather[0].description;
+      card.appendChild(icon);
+
+      const infoDiv = document.createElement("div");
+      infoDiv.className = "hour-info";
+
+      const descDiv = document.createElement("div");
+      descDiv.textContent = `${labels[currentLang].description}: ${item.weather[0].description}`;
+      infoDiv.appendChild(descDiv);
+
+      const timeDiv = document.createElement("div");
+      timeDiv.innerHTML = `<span class="detail-label">ساعت:</span> ${timeStr}`;
+      infoDiv.appendChild(timeDiv);
+
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = `<span class="detail-label">${labels[currentLang].temp}:</span> ${item.main.temp.toFixed(1)}°C`;
+      infoDiv.appendChild(tempDiv);
+
+      const humidityDiv = document.createElement("div");
+      humidityDiv.innerHTML = `<span class="detail-label">${labels[currentLang].humidity}:</span> ${item.main.humidity}%`;
+      infoDiv.appendChild(humidityDiv);
+
+      const pressureDiv = document.createElement("div");
+      pressureDiv.innerHTML = `<span class="detail-label">${labels[currentLang].pressure}:</span> ${item.main.pressure} hPa`;
+      infoDiv.appendChild(pressureDiv);
+
+      const windDiv = document.createElement("div");
+      windDiv.innerHTML = `<span class="detail-label">${labels[currentLang].windSpeed}:</span> ${item.wind.speed.toFixed(1)} m/s, <span class="detail-label">${labels[currentLang].windDir}:</span> ${degToDirection(item.wind.deg)}`;
+      infoDiv.appendChild(windDiv);
+
+      card.appendChild(infoDiv);
+
+      return card;
+    })();
   }
 
   function initMap(lat, lon) {
     map = L.map("map").setView([lat, lon], 10);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution:
-        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     mapMarker = L.marker([lat, lon]).addTo(map);
   }
 
-  // صفحه بارگذاری اولیه
+  // بارگذاری اولیه با شهر پیش‌فرض اهواز
   window.onload = () => {
+    document.getElementById("cityInput").value = "اهواز";
+    toggleLang(); // بارگذاری بر اساس زبان پیش‌فرض
     renderFavorites();
-    document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
+    searchCity();
   };
 </script>
 
