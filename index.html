@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>هواشناسی جهانی</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; background: #f0f8ff; padding: 20px; direction: rtl; text-align: right; }
+    .weather-box { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 0 10px #aaa; margin-bottom: 20px; }
+    h1, h2 { color: #003366; }
+    .icon { width: 60px; vertical-align: middle; }
+    .wind-arrow { display: inline-block; transform: rotate(0deg); transition: transform 0.5s; }
+    .forecast { display: flex; gap: 10px; overflow-x: auto; padding-top: 10px; }
+    .day-box { background: #eef; padding: 10px; border-radius: 10px; min-width: 120px; text-align: center; }
+    input[type="text"] { padding: 8px; width: 200px; border-radius: 5px; border: 1px solid #aaa; }
+    button { padding: 8px 16px; margin-right: 10px; border-radius: 5px; border: none; background: #0055aa; color: white; cursor: pointer; }
+    button:hover { background: #004080; }
+  </style>
+</head>
+<body>
+
+  <h1>هواشناسی جهانی</h1>
+  <div>
+    <input type="text" id="cityInput" placeholder="نام شهر را وارد کنید (مثلاً Ahvaz)">
+    <button onclick="fetchWeather()">جستجو</button>
+  </div>
+
+  <div class="weather-box" id="current-weather">در حال بارگذاری اطلاعات برای اهواز...</div>
+  <h2>پیش‌بینی ۵ روز آینده</h2>
+  <div class="forecast" id="forecast"></div>
+
+  <script>
+    const apiKey = "dc9c93f51cdd375d459483c2a9f86d88";
+    let city = "Ahvaz";
+    const lang = "fa";
+    const units = "metric";
+
+    async function fetchWeather() {
+      const input = document.getElementById("cityInput").value.trim();
+      if (input) city = input;
+
+      document.getElementById("current-weather").innerHTML = "در حال بارگذاری...";
+      document.getElementById("forecast").innerHTML = "";
+
+      try {
+        const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&lang=${lang}&units=${units}`);
+        if (!currentRes.ok) throw new Error("شهر یافت نشد");
+        const current = await currentRes.json();
+
+        const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&lang=${lang}&units=${units}`);
+        const forecast = await forecastRes.json();
+
+        // وضعیت فعلی
+        document.getElementById("current-weather").innerHTML = `
+          <h3>${current.name}</h3>
+          <p><img class="icon" src="https://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png" alt=""> ${current.weather[0].description}</p>
+          <p>دما: ${current.main.temp}°C</p>
+          <p>رطوبت: ${current.main.humidity}%</p>
+          <p>فشار: ${current.main.pressure} hPa</p>
+          <p>باد: ${current.wind.speed} m/s 
+            <span class="wind-arrow" style="transform: rotate(${current.wind.deg}deg)">🧭</span>
+          </p>
+        `;
+
+        // پیش‌بینی ۵ روز آینده
+        const forecastDays = {};
+        forecast.list.forEach(item => {
+          const date = item.dt_txt.split(" ")[0];
+          const hour = item.dt_txt.split(" ")[1];
+          if (hour === "12:00:00" && !forecastDays[date]) {
+            forecastDays[date] = item;
+          }
+        });
+
+        const forecastContainer = document.getElementById("forecast");
+        for (const date in forecastDays) {
+          const day = forecastDays[date];
+          forecastContainer.innerHTML += `
+            <div class="day-box">
+              <p><strong>${new Date(date).toLocaleDateString("fa-IR", { weekday: "long" })}</strong></p>
+              <img class="icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="">
+              <p>${day.weather[0].description}</p>
+              <p>${day.main.temp.toFixed(1)}°C</p>
+            </div>
+          `;
+        }
+      } catch (err) {
+        document.getElementById("current-weather").innerHTML = `<p style="color:red;">❌ ${err.message}</p>`;
+      }
+    }
+
+    fetchWeather(); // بارگذاری اولیه برای اهواز
+  </script>
+</body>
+</html>
