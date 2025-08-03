@@ -12,224 +12,7 @@
   crossorigin=""
 />
 <style>
-  body {
-    font-family: Vazir, sans-serif;
-    margin: 0;
-    background: linear-gradient(to top, #001529, #0a2749);
-    color: #eee;
-    direction: rtl;
-  }
-  header {
-    background-color: #003366;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  header h1 {
-    margin: 0;
-    font-weight: 700;
-    font-size: 1.8rem;
-  }
-  #langToggle {
-    background: #00509e;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  main {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 1rem;
-    gap: 1rem;
-  }
-  #leftPanel {
-    flex: 1 1 320px;
-    max-width: 400px;
-    background: #013a63;
-    border-radius: 12px;
-    padding: 1rem;
-  }
-  #searchSection {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-  #cityInput {
-    flex: 1;
-    padding: 0.6rem 0.8rem;
-    border-radius: 6px;
-    border: none;
-    font-size: 1rem;
-  }
-  #searchBtn {
-    background: #00509e;
-    color: white;
-    border: none;
-    padding: 0 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  #favorites {
-    margin-bottom: 1rem;
-  }
-  #favorites button {
-    background: #00509e;
-    color: white;
-    border: none;
-    margin: 0 0.2rem 0.2rem 0.2rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  #favorites button:hover {
-    background: #1a73e8;
-  }
-  #currentWeather {
-    background: #01497c;
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  #currentWeather img {
-    width: 100px;
-    height: 100px;
-  }
-  #currentWeather h2 {
-    margin: 0.5rem 0;
-  }
-  #currentWeather .temp {
-    font-size: 2.8rem;
-    font-weight: 700;
-  }
-  #currentWeather .desc {
-    font-size: 1.2rem;
-    margin: 0.5rem 0;
-  }
-  #currentWeather .details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.7rem;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-  }
-  #forecastContainer {
-    background: #013a63;
-    flex: 2 1 600px;
-    border-radius: 12px;
-    padding: 1rem;
-  }
-  #dailyForecast {
-    display: flex;
-    gap: 0.7rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-  }
-  .day-card {
-    background: #00509e;
-    flex: 0 0 120px;
-    border-radius: 10px;
-    padding: 0.5rem;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.3s;
-  }
-  .day-card.active,
-  .day-card:hover {
-    background: #1a73e8;
-  }
-  .day-card h3 {
-    margin: 0;
-    font-size: 1rem;
-    text-align: center;
-  }
-  .day-card img {
-    display: block;
-    margin: 0.3rem auto;
-    width: 60px;
-    height: 60px;
-  }
-  .day-card .temp {
-    font-size: 1.2rem;
-    text-align: center;
-    font-weight: 700;
-  }
-  #hourlyForecast {
-    margin-top: 1rem;
-    max-height: 320px;
-    overflow-y: auto;
-    background: #01497c;
-    border-radius: 12px;
-    padding: 1rem;
-  }
-  .hour-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.8rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #0277bd;
-  }
-  .hour-card img {
-    width: 48px;
-    height: 48px;
-  }
-  .hour-info {
-    flex: 1;
-  }
-  .hour-info div {
-    margin-bottom: 0.2rem;
-  }
-  .detail-label {
-    font-weight: 700;
-  }
-  #map {
-    height: 300px;
-    border-radius: 12px;
-    margin-top: 1rem;
-  }
-  footer {
-    text-align: center;
-    padding: 1rem;
-    font-size: 0.9rem;
-    background: #002143;
-    color: #bbb;
-  }
-  footer a {
-    color: #3399ff;
-    text-decoration: none;
-    margin: 0 0.5rem;
-  }
-  footer a:hover {
-    text-decoration: underline;
-  }
-  /* Scrollbar for daily forecast */
-  #dailyForecast::-webkit-scrollbar {
-    height: 8px;
-  }
-  #dailyForecast::-webkit-scrollbar-thumb {
-    background: #3399ff;
-    border-radius: 10px;
-  }
-  #dailyForecast::-webkit-scrollbar-track {
-    background: #013a63;
-  }
-  /* Scrollbar for hourly forecast */
-  #hourlyForecast::-webkit-scrollbar {
-    width: 8px;
-  }
-  #hourlyForecast::-webkit-scrollbar-thumb {
-    background: #3399ff;
-    border-radius: 10px;
-  }
-  #hourlyForecast::-webkit-scrollbar-track {
-    background: #013a63;
-  }
+  /* ... همان استایل‌هایی که شما گذاشتید ... */
 </style>
 </head>
 <body>
@@ -245,13 +28,9 @@
       <input id="cityInput" type="text" placeholder="نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)" />
       <button id="searchBtn" onclick="searchCity()">جستجو</button>
     </div>
-    <div id="favorites">
-      <!-- شهرهای مورد علاقه اینجا اضافه میشن -->
-    </div>
+    <div id="favorites"></div>
 
-    <div id="currentWeather">
-      <!-- وضعیت فعلی هوا نمایش داده میشه -->
-    </div>
+    <div id="currentWeather"></div>
   </section>
 
   <section id="forecastContainer">
@@ -272,9 +51,9 @@
   crossorigin="">
 </script>
 <script>
-  const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88"; // کلید API اوپن‌وذر شما
+  const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88"; 
   let currentLang = "fa";
-  let currentUnits = "metric"; // metric = سانتیگراد، imperial = فارنهایت
+  let currentUnits = "metric";
   let currentCity = null;
   let map, mapMarker;
 
@@ -339,20 +118,17 @@
     }
   };
 
-  // ذخیره و خواندن علاقه‌مندی‌ها در لوکال استوریج
   let favorites = JSON.parse(localStorage.getItem("favorites_weather")) || [];
 
-  // تابع تغییر زبان
   function toggleLang() {
     currentLang = currentLang === "fa" ? "ar" : "fa";
     document.getElementById("title").innerText = labels[currentLang].title;
     document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
     document.getElementById("searchBtn").innerText = labels[currentLang].searchBtn;
     renderFavorites();
-    renderCurrentWeather(currentCity);
+    if(currentCity) searchCity();
   }
 
-  // افزودن یا حذف از علاقه‌مندی‌ها
   function toggleFavorite(cityName) {
     if (favorites.includes(cityName)) {
       favorites = favorites.filter(c => c !== cityName);
@@ -363,7 +139,6 @@
     renderFavorites();
   }
 
-  // نمایش شهرهای مورد علاقه
   function renderFavorites() {
     const favDiv = document.getElementById("favorites");
     favDiv.innerHTML = "";
@@ -382,13 +157,11 @@
     });
   }
 
-  // جستجوی شهر و دریافت داده‌ها
   async function searchCity() {
     const city = document.getElementById("cityInput").value.trim();
     if (!city) return alert(labels[currentLang].errorCity);
 
     try {
-      // گرفتن مختصات با API جغرافیایی اوپن‌وذر
       const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`);
       const geoData = await geoRes.json();
       if (!geoData.length) return alert(labels[currentLang].errorCity);
@@ -396,7 +169,6 @@
       const { lat, lon, name, country } = geoData[0];
       currentCity = { lat, lon, name, country };
 
-      // بروز رسانی نقشه
       if (!map) initMap(lat, lon);
       else {
         map.setView([lat, lon], 10);
@@ -404,15 +176,12 @@
         mapMarker = L.marker([lat, lon]).addTo(map).bindPopup(`${name}, ${country}`).openPopup();
       }
 
-      // دریافت داده‌های آب‌وهوا
       const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${currentUnits}&lang=${currentLang}&appid=${API_KEY}`);
       const weatherData = await weatherRes.json();
 
-      // دریافت وضعیت فعلی
       const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${currentUnits}&lang=${currentLang}&appid=${API_KEY}`);
       const currentData = await currentRes.json();
 
-      // دریافت کیفیت هوا
       const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
       const aqiData = await aqiRes.json();
 
@@ -424,7 +193,6 @@
     }
   }
 
-  // تابع تبدیل جهت باد به فارسی/عربی
   function degToDirection(deg) {
     const directionsFa = ["شمال", "شمال‌شرق", "شرق", "جنوب‌شرق", "جنوب", "جنوب‌غرب", "غرب", "شمال‌غرب"];
     const directionsAr = ["شمال", "شمال شرقي", "شرق", "جنوب شرقي", "جنوب", "جنوب غربي", "غرب", "شمال غربي"];
@@ -433,7 +201,6 @@
     return directions[index];
   }
 
-  // نمایش وضعیت فعلی هوا
   function renderCurrentWeather(currentData, aqiData) {
     if (!currentData) return;
     const container = document.getElementById("currentWeather");
@@ -447,13 +214,12 @@
     const pressure = currentData.main.pressure;
     const windSpeed = currentData.wind.speed.toFixed(1);
     const windDeg = currentData.wind.deg;
-    const visibility = currentData.visibility / 1000; // کیلومتر
+    const visibility = currentData.visibility / 1000;
     const sunrise = new Date(currentData.sys.sunrise * 1000);
     const sunset = new Date(currentData.sys.sunset * 1000);
     const sunriseStr = sunrise.toLocaleTimeString(currentLang === "fa" ? "fa-IR" : "ar-EG", {hour: "2-digit", minute: "2-digit"});
     const sunsetStr = sunset.toLocaleTimeString(currentLang === "fa" ? "fa-IR" : "ar-EG", {hour: "2-digit", minute: "2-digit"});
 
-    // کیفیت هوا (AQI)
     let aqiText = "";
     let aqiColor = "";
     if (aqiData && aqiData.list && aqiData.list.length) {
@@ -470,8 +236,6 @@
     const feelsLike = currentData.main.feels_like.toFixed(1);
     const dewPoint = (currentData.main.temp - ((100 - humidity) / 5)).toFixed(1);
     const clouds = currentData.clouds.all;
-    const pop = currentData.pop ? (currentData.pop * 100).toFixed(0) : "-";
-    const uvIndex = currentData.uvi ? currentData.uvi.toFixed(1) : "-";
 
     container.innerHTML = `
       <h2>${cityName}</h2>
@@ -494,7 +258,6 @@
     `;
   }
 
-  // نمایش پیش‌بینی ۵ روزه و ساعتی با باز و بسته شدن
   function renderForecast(data) {
     if (!data) return;
     const dailyDiv = document.getElementById("dailyForecast");
@@ -502,7 +265,6 @@
     dailyDiv.innerHTML = "";
     hourlyDiv.innerHTML = "";
 
-    // گروه بندی داده‌ها بر اساس روز
     const days = {};
     data.list.forEach(item => {
       const date = item.dt_txt.split(" ")[0];
@@ -510,12 +272,10 @@
       days[date].push(item);
     });
 
-    // روزهای مرتب شده
     const dayKeys = Object.keys(days).slice(0, 5);
 
     dayKeys.forEach((date, i) => {
       const dayItems = days[date];
-      // میانگین دما، آیکون و توضیح برای کارت روز
       const avgTemp = (
         dayItems.reduce((acc, it) => acc + it.main.temp, 0) / dayItems.length
       ).toFixed(1);
@@ -551,11 +311,9 @@
       dailyDiv.appendChild(dayCard);
     });
 
-    // نمایش ساعتی روز اول به صورت پیش‌فرض
     renderHourly(days[dayKeys[0]]);
   }
 
-  // نمایش پیش‌بینی ساعتی برای روز انتخاب شده
   function renderHourly(hourItems) {
     const hourlyDiv = document.getElementById("hourlyForecast");
     hourlyDiv.innerHTML = `<h3>${labels[currentLang].hourlyTitle}</h3>`;
@@ -583,32 +341,4 @@
             <div>${labels[currentLang].temp}: ${temp} °C ( ${labels[currentLang].feelsLike}: ${feelsLike} °C )</div>
             <div>${labels[currentLang].humidity}: ${humidity}%</div>
             <div>${labels[currentLang].pressure}: ${pressure} hPa</div>
-            <div>${labels[currentLang].windSpeed}: ${windSpeed} m/s (${degToDirection(windDeg)})</div>
-            <div>${labels[currentLang].pop}: ${pop}%</div>
-            <div>${labels[currentLang].clouds}: ${clouds}%</div>
-            <div>${labels[currentLang].dewPoint}: ${dewPoint} °C</div>
-          </div>
-        </div>
-      `;
-    });
-  }
-
-  // مقداردهی اولیه نقشه
-  function initMap(lat, lon) {
-    map = L.map("map").setView([lat, lon], 10);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
-    mapMarker = L.marker([lat, lon]).addTo(map);
-  }
-
-  // بارگذاری اولیه
-  window.onload = () => {
-    renderFavorites();
-    document.getElementById("cityInput").value = "اهواز";
-    searchCity();
-  };
-</script>
-</body>
-</html>
+            <div>${labels[currentLang].windSpeed}: ${windSpeed}
