@@ -8,7 +8,6 @@
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-oGZj6j7l75Qo6Sj01WZb2n08+36a3L8aV7Qw+iYXF0k="
   crossorigin=""
 />
 <style>
@@ -168,42 +167,25 @@
     padding: 1rem;
   }
   .hour-card {
-    border-bottom: 1px solid #0277bd;
-    padding-bottom: 0.6rem;
-    margin-bottom: 0.6rem;
-  }
-  .hour-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    cursor: pointer;
-    user-select: none;
-  }
-  .hour-header h4 {
-    margin: 0;
-    font-weight: 700;
-  }
-  .hour-details {
-    display: none;
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
-  .hour-details.visible {
-    display: block;
-  }
-  .hour-row {
-    display: flex;
     gap: 1rem;
-    flex-wrap: wrap;
-    align-items: center;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #0277bd;
   }
-  .hour-row img {
+  .hour-card img {
     width: 48px;
     height: 48px;
   }
-  .hour-row div {
-    min-width: 100px;
+  .hour-info {
+    flex: 1;
+  }
+  .hour-info div {
+    margin-bottom: 0.2rem;
+  }
+  .detail-label {
+    font-weight: 700;
   }
   #map {
     height: 300px;
@@ -262,13 +244,8 @@
       <input id="cityInput" type="text" placeholder="نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)" />
       <button id="searchBtn" onclick="searchCity()">جستجو</button>
     </div>
-    <div id="favorites">
-      <!-- شهرهای مورد علاقه اینجا اضافه میشن -->
-    </div>
-
-    <div id="currentWeather">
-      <!-- وضعیت فعلی هوا نمایش داده میشه -->
-    </div>
+    <div id="favorites"></div>
+    <div id="currentWeather"></div>
   </section>
 
   <section id="forecastContainer">
@@ -279,19 +256,18 @@
 </main>
 
 <footer>
-  <div>📞 تماس: <a href="tel:09332356547">09332356547</a></div>
+  <div>تماس: <a href="tel:09332356547">09332356547</a></div>
   <div>اینستاگرام: <a href="https://instagram.com/mehdi.eidani" target="_blank">@mehdi.eidani</a></div>
   <div>ایمیل: <a href="mailto:mehdi1eidani@gmail.com">mehdi1eidani@gmail.com</a></div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-oW7l7NhKX0iSXXEe4BfPvvCJS8+PpL3e2pA6cd9vXNk="
   crossorigin="">
 </script>
 <script>
-  const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88"; // کلید API اوپن‌وذر شما
+  const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88";
   let currentLang = "fa";
-  let currentUnits = "metric"; // metric = سانتیگراد، imperial = فارنهایت
+  let currentUnits = "metric";
   let currentCity = null;
   let map, mapMarker;
 
@@ -356,10 +332,8 @@
     }
   };
 
-  // ذخیره و خواندن علاقه‌مندی‌ها در لوکال استوریج
   let favorites = JSON.parse(localStorage.getItem("favorites_weather")) || [];
 
-  // تابع تغییر زبان
   function toggleLang() {
     currentLang = currentLang === "fa" ? "ar" : "fa";
     document.getElementById("title").innerText = labels[currentLang].title;
@@ -369,7 +343,6 @@
     renderCurrentWeather(currentCity);
   }
 
-  // افزودن یا حذف از علاقه‌مندی‌ها
   function toggleFavorite(cityName) {
     if (favorites.includes(cityName)) {
       favorites = favorites.filter(c => c !== cityName);
@@ -380,7 +353,6 @@
     renderFavorites();
   }
 
-  // نمایش شهرهای مورد علاقه
   function renderFavorites() {
     const favDiv = document.getElementById("favorites");
     favDiv.innerHTML = "";
@@ -399,13 +371,11 @@
     });
   }
 
-  // جستجوی شهر و دریافت داده‌ها
   async function searchCity() {
     const city = document.getElementById("cityInput").value.trim();
     if (!city) return alert(labels[currentLang].errorCity);
 
     try {
-      // گرفتن مختصات با API جغرافیایی اوپن‌وذر
       const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`);
       const geoData = await geoRes.json();
       if (!geoData.length) return alert(labels[currentLang].errorCity);
@@ -413,7 +383,6 @@
       const { lat, lon, name, country } = geoData[0];
       currentCity = { lat, lon, name, country };
 
-      // بروز رسانی نقشه
       if (!map) initMap(lat, lon);
       else {
         map.setView([lat, lon], 10);
@@ -421,15 +390,12 @@
         mapMarker = L.marker([lat, lon]).addTo(map).bindPopup(`${name}, ${country}`).openPopup();
       }
 
-      // دریافت داده‌های آب‌وهوا
       const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${currentUnits}&lang=${currentLang}&appid=${API_KEY}`);
       const weatherData = await weatherRes.json();
 
-      // دریافت وضعیت فعلی
       const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${currentUnits}&lang=${currentLang}&appid=${API_KEY}`);
       const currentData = await currentRes.json();
 
-      // دریافت کیفیت هوا
       const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
       const aqiData = await aqiRes.json();
 
@@ -441,7 +407,6 @@
     }
   }
 
-  // تبدیل جهت باد به فارسی/عربی
   function degToDirection(deg) {
     const directionsFa = ["شمال", "شمال‌شرق", "شرق", "جنوب‌شرق", "جنوب", "جنوب‌غرب", "غرب", "شمال‌غرب"];
     const directionsAr = ["شمال", "شمال شرقي", "شرق", "جنوب شرقي", "جنوب", "جنوب غربي", "غرب", "شمال غربي"];
@@ -450,7 +415,6 @@
     return directions[index];
   }
 
-  // نمایش وضعیت فعلی هوا
   function renderCurrentWeather(currentData, aqiData) {
     if (!currentData) return;
     const container = document.getElementById("currentWeather");
@@ -464,40 +428,46 @@
     const pressure = currentData.main.pressure;
     const windSpeed = currentData.wind.speed.toFixed(1);
     const windDeg = currentData.wind.deg;
-    const visibility = currentData.visibility / 1000; // کیلومتر
+    const visibility = currentData.visibility / 1000;
     const sunrise = new Date(currentData.sys.sunrise * 1000);
     const sunset = new Date(currentData.sys.sunset * 1000);
     const sunriseStr = sunrise.toLocaleTimeString(currentLang === "fa" ? "fa-IR" : "ar-EG", {hour: "2-digit", minute: "2-digit"});
     const sunsetStr = sunset.toLocaleTimeString(currentLang === "fa" ? "fa-IR" : "ar-EG", {hour: "2-digit", minute: "2-digit"});
 
-    // کیفیت هوا (AQI)
     let aqiText = "";
     let aqiColor = "";
     if (aqiData && aqiData.list && aqiData.list.length) {
       const aqi = aqiData.list[0].main.aqi;
       switch (aqi) {
         case 1: aqiText = currentLang === "fa" ? "خوب" : "جيد"; aqiColor = "green"; break;
-        case 2: aqiText = currentLang === "fa" ? "متوسط" : "متوسط"; aqiColor = "yellow"; break;
-        case 3: aqiText = currentLang === "fa" ? "ناسالم برای گروه‌های حساس" : "غير صحي للمجموعات الحساسة"; aqiColor = "orange"; break;
+        case 2: aqiText = currentLang === "fa" ? "معمولی" : "متوسط"; aqiColor = "yellow"; break;
+        case 3: aqiText = currentLang === "فا" ? "ناسالم برای گروه‌های حساس" : "غير صحي للمجموعات الحساسة"; aqiColor = "orange"; break;
         case 4: aqiText = currentLang === "fa" ? "ناسالم" : "غير صحي"; aqiColor = "red"; break;
-        case 5: aqiText = currentLang === "fa" ? "بسیار ناسالم" : "غير صحي للغاية"; aqiColor = "purple"; break;
+        case 5: aqiText = currentLang === "fa" ? "بسیار ناسالم" : "سيء جدا"; aqiColor = "purple"; break;
       }
     }
+
+    const feelsLike = currentData.main.feels_like.toFixed(1);
+    const dewPoint = (currentData.main.temp - ((100 - humidity) / 5)).toFixed(1);
+    const clouds = currentData.clouds.all;
 
     container.innerHTML = `
       <h2>${cityName}</h2>
       <img src="${iconUrl}" alt="${desc}" />
-      <div class="temp">${temp}°${currentUnits === "metric" ? "C" : "F"}</div>
+      <div class="temp">${temp} °C</div>
       <div class="desc">${desc}</div>
       <div class="details">
         <div><strong>${labels[currentLang].humidity}:</strong> ${humidity}%</div>
         <div><strong>${labels[currentLang].pressure}:</strong> ${pressure} hPa</div>
-        <div><strong>${labels[currentLang].windSpeed}:</strong> ${windSpeed} ${currentUnits === "metric" ? "متر/ث" : "ميل/س"}</div>
+        <div><strong>${labels[currentLang].windSpeed}:</strong> ${windSpeed} m/s</div>
         <div><strong>${labels[currentLang].windDir}:</strong> ${degToDirection(windDeg)}</div>
-        <div><strong>${labels[currentLang].visibility}:</strong> ${visibility.toFixed(1)} km</div>
+        <div><strong>${labels[currentLang].visibility}:</strong> ${visibility} km</div>
         <div><strong>${labels[currentLang].sunrise}:</strong> ${sunriseStr}</div>
         <div><strong>${labels[currentLang].sunset}:</strong> ${sunsetStr}</div>
         <div><strong>${labels[currentLang].aqi}:</strong> <span style="color:${aqiColor}">${aqiText}</span></div>
+        <div><strong>${labels[currentLang].feelsLike}:</strong> ${feelsLike} °C</div>
+        <div><strong>${labels[currentLang].dewPoint}:</strong> ${dewPoint} °C</div>
+        <div><strong>${labels[currentLang].clouds}:</strong> ${clouds}%</div>
       </div>
       <button onclick="toggleFavorite('${currentData.name}')">
         ${favorites.includes(currentData.name) ? labels[currentLang].removeFav : labels[currentLang].addFav}
@@ -505,123 +475,101 @@
     `;
   }
 
-  // نمایش پیش‌بینی 5 روزه و ساعتی
   function renderForecast(weatherData) {
     if (!weatherData) return;
+    // پیش‌بینی روزانه (تقسیم بندی هر 8 داده هر 24 ساعت)
+    const dailyDiv = document.getElementById("dailyForecast");
+    dailyDiv.innerHTML = "";
 
-    // سازماندهی داده‌ها بر اساس روز
-    const dailyData = {};
+    // مرتب کردن و جداسازی داده‌ها به روزها
+    let dailyData = {};
     weatherData.list.forEach(item => {
-      const date = new Date(item.dt * 1000);
-      const dayKey = date.toISOString().split("T")[0];
-      if (!dailyData[dayKey]) dailyData[dayKey] = [];
-      dailyData[dayKey].push(item);
+      const date = item.dt_txt.split(" ")[0];
+      if (!dailyData[date]) dailyData[date] = [];
+      dailyData[date].push(item);
     });
 
-    // روزها را مرتب کنیم (حداکثر 5 روز)
-    const sortedDays = Object.keys(dailyData).slice(0, 5);
+    // ایجاد کارت‌های روزانه
+    let dayIndex = 0;
+    for (const [date, items] of Object.entries(dailyData)) {
+      if (dayIndex >= 5) break; // فقط 5 روز آینده
 
-    // نمایش روزها
-    const dailyContainer = document.getElementById("dailyForecast");
-    dailyContainer.innerHTML = "";
+      // میانگین دما و آیکون روزانه
+      const temps = items.map(i => i.main.temp);
+      const avgTemp = (temps.reduce((a,b) => a+b, 0) / temps.length).toFixed(1);
 
-    sortedDays.forEach((day, i) => {
-      const dayItems = dailyData[day];
-      const dateObj = new Date(day);
-      const dayNameFa = dateObj.toLocaleDateString("fa-IR", { weekday: "short", day: "numeric", month: "short" });
-      const dayNameAr = dateObj.toLocaleDateString("ar-EG", { weekday: "short", day: "numeric", month: "short" });
-      const dayName = currentLang === "fa" ? dayNameFa : dayNameAr;
+      const icon = items[0].weather[0].icon;
+      const desc = items[0].weather[0].description;
 
-      // متوسط دما در آن روز (میانگین)
-      const temps = dayItems.map(d => d.main.temp);
-      const avgTemp = (temps.reduce((a,b) => a+b,0)/temps.length).toFixed(1);
-
-      // وضعیت هوا و آیکن اول روز (برای نمایش)
-      const weather = dayItems[0].weather[0];
-      const iconUrl = `https://openweathermap.org/img/wn/${weather.icon}@2x.png`;
-      const desc = weather.description;
+      const dayName = new Date(date).toLocaleDateString(currentLang === "fa" ? "fa-IR" : "ar-EG", { weekday: "short" });
 
       const card = document.createElement("div");
       card.className = "day-card";
-      if(i === 0) card.classList.add("active");
+      if(dayIndex === 0) card.classList.add("active");
+      card.dataset.date = date;
+
       card.innerHTML = `
         <h3>${dayName}</h3>
-        <img src="${iconUrl}" alt="${desc}" title="${desc}" />
-        <div class="temp">${avgTemp}°${currentUnits === "metric" ? "C" : "F"}</div>
+        <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}" />
+        <div class="temp">${avgTemp} °C</div>
       `;
-      card.onclick = () => {
-        document.querySelectorAll(".day-card").forEach(c => c.classList.remove("active"));
-        card.classList.add("active");
-        renderHourly(dayItems);
-      };
-      dailyContainer.appendChild(card);
-    });
 
-    // نمایش ساعتی اولین روز به صورت پیش‌فرض
-    renderHourly(dailyData[sortedDays[0]]);
+      card.onclick = () => renderHourly(date, dailyData[date]);
+
+      dailyDiv.appendChild(card);
+      dayIndex++;
+    }
+
+    // به طور پیش فرض اولین روز انتخاب شده و ساعت‌ها نمایش داده شوند
+    const firstDate = Object.keys(dailyData)[0];
+    if(firstDate) renderHourly(firstDate, dailyData[firstDate]);
   }
 
-  // نمایش پیش‌بینی ساعتی (کشویی)
-  function renderHourly(hourlyList) {
-    const hourlyContainer = document.getElementById("hourlyForecast");
-    hourlyContainer.innerHTML = `<h3>${labels[currentLang].hourlyTitle}</h3>`;
+  function renderHourly(date, hourlyList) {
+    const hourlyDiv = document.getElementById("hourlyForecast");
+    hourlyDiv.innerHTML = `<h3>${labels[currentLang].hourlyTitle} - ${new Date(date).toLocaleDateString(currentLang === "fa" ? "fa-IR" : "ar-EG")}</h3>`;
+    hourlyList.forEach(hour => {
+      const time = hour.dt_txt.split(" ")[1].slice(0,5);
+      const icon = hour.weather[0].icon;
+      const desc = hour.weather[0].description;
+      const temp = hour.main.temp.toFixed(1);
+      const windSpeed = hour.wind.speed.toFixed(1);
+      const windDir = degToDirection(hour.wind.deg);
 
-    hourlyList.forEach(item => {
-      const date = new Date(item.dt * 1000);
-      const hourStr = date.toLocaleTimeString(currentLang === "fa" ? "fa-IR" : "ar-EG", {hour: "2-digit", minute: "2-digit"});
-
-      const iconUrl = `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`;
-      const desc = item.weather[0].description;
-      const temp = item.main.temp.toFixed(1);
-      const feelsLike = item.main.feels_like.toFixed(1);
-      const humidity = item.main.humidity;
-      const pressure = item.main.pressure;
-      const windSpeed = item.wind.speed.toFixed(1);
-      const windDir = degToDirection(item.wind.deg);
-      const pop = (item.pop * 100).toFixed(0);
-      const dewPoint = item.main.dew_point ? item.main.dew_point.toFixed(1) : "-";
-      const clouds = item.clouds.all;
-      const visibility = item.visibility ? (item.visibility / 1000).toFixed(1) : "-";
-
-      const hourCard = document.createElement("div");
-      hourCard.className = "hour-card";
-
-      hourCard.innerHTML = `
-        <div class="hour-row">
-          <div><strong>${hourStr}</strong></div>
-          <img src="${iconUrl}" alt="${desc}" title="${desc}" />
-          <div><strong>${labels[currentLang].temp}:</strong> ${temp}°${currentUnits === "metric" ? "C" : "F"}</div>
-          <div><strong>${labels[currentLang].feelsLike}:</strong> ${feelsLike}°</div>
-          <div><strong>${labels[currentLang].humidity}:</strong> ${humidity}%</div>
-          <div><strong>${labels[currentLang].pressure}:</strong> ${pressure} hPa</div>
-          <div><strong>${labels[currentLang].windSpeed}:</strong> ${windSpeed} ${currentUnits === "metric" ? "متر/ث" : "ميل/س"}</div>
-          <div><strong>${labels[currentLang].windDir}:</strong> ${windDir}</div>
-          <div><strong>${labels[currentLang].pop}:</strong> ${pop}%</div>
-          <div><strong>${labels[currentLang].dewPoint}:</strong> ${dewPoint}</div>
-          <div><strong>${labels[currentLang].clouds}:</strong> ${clouds}%</div>
-          <div><strong>${labels[currentLang].visibility}:</strong> ${visibility} km</div>
+      const card = document.createElement("div");
+      card.className = "hour-card";
+      card.innerHTML = `
+        <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${desc}" />
+        <div class="hour-info">
+          <div><strong>${time}</strong></div>
+          <div>${desc}</div>
+          <div><strong>${labels[currentLang].temp}:</strong> ${temp} °C</div>
+          <div><strong>${labels[currentLang].windSpeed}:</strong> ${windSpeed} m/s (${windDir})</div>
         </div>
       `;
+      hourlyDiv.appendChild(card);
+    });
 
-      hourlyContainer.appendChild(hourCard);
+    // تغییر وضعیت فعال کارت روزانه
+    document.querySelectorAll(".day-card").forEach(card => {
+      card.classList.toggle("active", card.dataset.date === date);
     });
   }
 
-  // نقشه را راه‌اندازی کن
   function initMap(lat, lon) {
-    map = L.map('map').setView([lat, lon], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    map = L.map("map").setView([lat, lon], 10);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
-      attribution: '© OpenStreetMap contributors'
+      attribution:
+        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
     mapMarker = L.marker([lat, lon]).addTo(map);
   }
 
-  // صفحه که باز میشه شهر پیشفرض اهواز باشه
+  // صفحه بارگذاری اولیه
   window.onload = () => {
-    document.getElementById("cityInput").value = "اهواز";
     renderFavorites();
-    searchCity();
+    document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
   };
 </script>
 
