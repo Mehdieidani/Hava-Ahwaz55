@@ -1,70 +1,231 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>نقشه هواشناسی جهان</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>هواشناسی پیشرفته</title>
+  <link href="https://cdn.jsdelivr.net/npm/vazir-font@v1.1.2/dist/font-face.css" rel="stylesheet">
   <style>
-    body { margin:0; font-family: Vazir, sans-serif; }
-    #map { height: 60vh; }
-    #search { padding: 0.5rem; text-align:center; }
-    #weather { padding:1rem; text-align:center; }
-    .ad-box { position:fixed; bottom:20px; left:20px; background:#fff; border:2px solid #2196f3;
-      border-radius:15px; padding:10px; z-index:9999; width:240px; text-align:center;}
-    .ad-box a { color:#2196f3; text-decoration:none; font-weight:bold; }
-    .close-ad { position:absolute; top:5px; right:8px; cursor:pointer; color:red; font-size:18px;}
+    body {
+      font-family: Vazir, sans-serif;
+      background: linear-gradient(to top, #e0f7fa, #ffffff);
+      margin: 0;
+      direction: rtl;
+      color: #333;
+    }
+    header {
+      background-color: #007acc;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lang-toggle {
+      background: white;
+      color: #007acc;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .search-box {
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+    .search-box input {
+      width: 70%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    .forecast-section {
+      padding: 1rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .hourly, .daily {
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      padding: 1rem;
+    }
+    .hourly h2, .daily h2 {
+      margin-top: 0;
+    }
+    .hour-list, .day-list {
+      display: flex;
+      overflow-x: auto;
+      gap: 1rem;
+      padding: 0.5rem 0;
+    }
+    .forecast-card {
+      min-width: 120px;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 10px;
+      background: #f1f8ff;
+    }
+    .forecast-card img {
+      width: 50px;
+      height: 50px;
+    }
+    .map-section {
+      margin: 2rem;
+      text-align: center;
+    }
+    .map-section img {
+      width: 90%;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .city-image {
+      margin: 1rem auto;
+      text-align: center;
+    }
+    .city-image img {
+      width: 200px;
+      border-radius: 12px;
+    }
+    .ad-banner {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      background: white;
+      border: 2px solid #007acc;
+      border-radius: 12px;
+      padding: 10px;
+      z-index: 999;
+      width: 250px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .ad-banner a {
+      display: block;
+      margin-top: 8px;
+      color: #007acc;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .close-ad {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      color: red;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <header id="search">
-    <input type="text" id="city" placeholder="نام شهر یا روستا..." style="width:60%;padding:0.5rem;">
-    <button onclick="searchCity()">جستجو</button>
+  <header>
+    <h1 id="title">پیش‌بینی هوا</h1>
+    <button class="lang-toggle" onclick="toggleLang()">AR</button>
   </header>
-  <div id="map"></div>
-  <div id="weather"></div>
-  <div class="ad-box">
-    <span class="close-ad" onclick="this.parentElement.style.display='none'">✕</span>
-    <a href="tel:09332356547">📞 تماس با پشتیبانی</a>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="نام شهر را وارد کنید... (مثلاً اهواز یا کاظمی دو)" onkeydown="if(event.key==='Enter') fetchWeather()" />
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <div class="city-image">
+    <img id="cityImage" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Khuzestan_map.png/320px-Khuzestan_map.png" alt="نمای شهر" />
+  </div>
+
+  <div class="forecast-section">
+    <div class="hourly">
+      <h2>پیش‌بینی ساعتی</h2>
+      <div class="hour-list" id="hourlyForecast">
+        <!-- کارت‌های ساعتی -->
+      </div>
+    </div>
+
+    <div class="daily">
+      <h2>پیش‌بینی ۵ روزه</h2>
+      <div class="day-list" id="dailyForecast">
+        <!-- کارت‌های روزانه -->
+      </div>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <h2>نقشه آب‌وهوایی</h2>
+    <img src="https://tile.openweathermap.org/map/precipitation_new/5/17/10.png?appid=dc9c93f51cdd375d459483c2a9f86d88" alt="نقشه بارش">
+  </div>
+
+  <div class="ad-banner" id="adBanner">
+    <span class="close-ad" onclick="document.getElementById('adBanner').style.display='none'">✕</span>
+    <strong>📞 تماس با ما</strong>
+    <a href="tel:09332356547">09332356547</a>
+    <a href="https://t.me/your_channel" target="_blank">تلگرام ما</a>
+  </div>
+
   <script>
-    const apiKey = 'dc9c93f51cdd375d459483c2a9f86d88'; // کلید شما
-    const map = L.map('map').setView([31.3, 48.7], 5);
-    L.tileLayer(`https://tile.openweathermap.org/map/WND/{z}/{x}/{y}.png?appid=${apiKey}`, {
-      opacity:0.5, attribution:'© OpenWeatherMap'
-    }).addTo(map);
+    const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88"; // OpenWeatherMap
+    const searchInput = document.getElementById("searchInput");
 
-    let marker = null;
-    async function searchCity() {
-      const name = document.getElementById('city').value.trim();
-      if (!name) return alert('نام شهر یا روستا را وارد کنید');
-      const geo = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(name)},IR&limit=1&appid=${apiKey}`);
-      const places = await geo.json();
-      if (!places.length) return alert('مکان یافت نشد');
-      const {lat, lon, name: placeName} = places[0];
-      map.setView([lat,lon],8);
-      if (marker) map.removeLayer(marker);
-      marker = L.marker([lat,lon]).addTo(map).bindPopup(placeName).openPopup();
-      fetchWeather(lat, lon, placeName);
+    function fetchWeather() {
+      const city = searchInput.value.trim();
+      if (!city) return;
+
+      // تصویر نمادین شهر (تغییریافته بر اساس شهر وارد شده)
+      document.getElementById("cityImage").src = `https://source.unsplash.com/320x200/?${city}`;
+
+      // Fetch hourly and daily forecast
+      fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric&lang=fa`)
+        .then(res => res.json())
+        .then(data => {
+          const hourly = document.getElementById("hourlyForecast");
+          const daily = document.getElementById("dailyForecast");
+          hourly.innerHTML = "";
+          daily.innerHTML = "";
+
+          // ساعتی (اولین 8 عدد: 3 ساعته در 24 ساعت)
+          for (let i = 0; i < 8; i++) {
+            const item = data.list[i];
+            const card = `
+              <div class="forecast-card">
+                <p>${new Date(item.dt_txt).getHours()}:00</p>
+                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" />
+                <p>${item.main.temp}°C</p>
+              </div>
+            `;
+            hourly.innerHTML += card;
+          }
+
+          // روزانه (هر 8 عدد ≈ 1 روز)
+          for (let i = 0; i < 40; i += 8) {
+            const item = data.list[i];
+            const card = `
+              <div class="forecast-card">
+                <p>${new Date(item.dt_txt).toLocaleDateString('fa-IR')}</p>
+                <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" />
+                <p>${item.main.temp}°C</p>
+              </div>
+            `;
+            daily.innerHTML += card;
+          }
+        });
     }
 
-    async function fetchWeather(lat, lon, placeName) {
-      const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=fa`);
-      const w = await res.json();
-      document.getElementById('weather').innerHTML = `
-        <h2>${placeName}</h2>
-        <p>${w.weather[0].description}</p>
-        <p>دمای فعلی: ${Math.round(w.main.temp)}°C</p>
-        <p>رطوبت: ${w.main.humidity}%</p>
-        <p>باد: ${Math.round(w.wind.speed)} m/s جهت ${windDir(w.wind.deg)}</p>
-      `;
-    }
+    function toggleLang() {
+      const langBtn = document.querySelector('.lang-toggle');
+      const title = document.getElementById('title');
+      const currentLang = document.documentElement.lang;
 
-    function windDir(deg) {
-      const dirs = ['شمال','شمال‌شرقی','شرق','جنوب‌شرق','جنوب','جنوب‌غرب','غرب','شمال‌غرب'];
-      return dirs[Math.round(deg/45)%8];
+      if (currentLang === 'fa') {
+        document.documentElement.lang = 'ar';
+        title.innerText = 'حالة الطقس';
+        langBtn.innerText = 'FA';
+        searchInput.placeholder = 'أدخل اسم المدينة... (مثلاً الأحواز)';
+      } else {
+        document.documentElement.lang = 'fa';
+        title.innerText = 'پیش‌بینی هوا';
+        langBtn.innerText = 'AR';
+        searchInput.placeholder = 'نام شهر را وارد کنید...';
+      }
     }
   </script>
 </body>
