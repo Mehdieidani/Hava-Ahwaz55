@@ -1,62 +1,96 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>وضعیت آب‌وهوا</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: sans-serif;
       direction: rtl;
-      background: #eef;
+      background: #eef6fb;
       margin: 0;
-      padding: 10px;
+      padding: 15px;
+      color: #003366;
       text-align: center;
     }
-    h1, h3 {
-      color: #003366;
+    h1, h2, h3 {
+      margin: 10px 0;
     }
     #cityInput {
       padding: 10px;
       width: 80%;
-      max-width: 300px;
+      max-width: 320px;
       font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #2196f3;
+      outline: none;
     }
     button {
-      padding: 10px 15px;
-      margin: 5px;
+      padding: 10px 16px;
+      margin: 0 5px;
       font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background-color: #2196f3;
+      color: white;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
-    .weather-card, .hour-card {
-      background: white;
-      display: inline-block;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      width: 120px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .weather-icon {
-      width: 60px;
+    button:hover {
+      background-color: #0b62c4;
     }
     .ad-box {
       margin: 20px auto;
-      background: #ffd;
-      padding: 10px;
+      background: #fff8dc;
+      padding: 12px;
       border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 320px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #d32f2f;
     }
     .ad-box a {
+      color: #d32f2f;
       text-decoration: none;
-      color: #d00;
-      font-weight: bold;
-      font-size: 18px;
     }
-    iframe {
+    #mapFrame {
       width: 90%;
       height: 300px;
-      margin: 15px auto;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
+      margin: 15px auto;
+      display: block;
+    }
+    #dailyForecast, #hourlyForecast {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .weather-card, .hour-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 12px;
+      width: 140px;
+      text-align: center;
+      color: #003366;
+    }
+    .weather-icon {
+      width: 60px;
+      height: 60px;
+      margin: 8px 0;
+    }
+    .weather-card div, .hour-card div {
+      margin: 4px 0;
+    }
+    .hour-card {
+      font-size: 14px;
     }
   </style>
 </head>
@@ -67,119 +101,141 @@
   <button id="langToggle" onclick="toggleLang()">AR</button>
 
   <div class="ad-box">
-    <a href="tel:09332356547">📞 تماس با 09332356547</a>
+    <a href="tel:09332356547" id="callLink">📞 تماس با 09332356547</a>
   </div>
 
   <h2 id="cityName">اهواز</h2>
-
   <iframe id="mapFrame" src=""></iframe>
 
-  <h3>پیش‌بینی ساعتی</h3>
+  <h3 id="hourlyTitle">پیش‌بینی ساعتی</h3>
   <div id="hourlyForecast"></div>
 
-  <h3>پیش‌بینی ۵ روزه</h3>
+  <h3 id="dailyTitle">پیش‌بینی ۵ روزه</h3>
   <div id="dailyForecast"></div>
 
-<script>
-  const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88"; // کلید شما
-  let currentLang = "fa";
+  <script>
+    const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88";
+    let currentLang = "fa";
 
-  const labels = {
-    fa: {
-      title: "وضعیت آب‌وهوا",
-      searchPlaceholder: "نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)",
-      forecastHourly: "پیش‌بینی ساعتی",
-      call: "📞 تماس با 09332356547"
-    },
-    ar: {
-      title: "حالة الطقس",
-      searchPlaceholder: "أدخل اسم المدينة أو القرية",
-      forecastHourly: "توقعات كل ساعة",
-      call: "📞 اتصل بـ 09332356547"
-    }
-  };
+    const labels = {
+      fa: {
+        title: "وضعیت آب‌وهوا",
+        searchPlaceholder: "نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)",
+        forecastHourly: "پیش‌بینی ساعتی",
+        forecastDaily: "پیش‌بینی ۵ روزه",
+        call: "📞 تماس با 09332356547",
+        cityNotFound: "شهر مورد نظر پیدا نشد."
+      },
+      ar: {
+        title: "حالة الطقس",
+        searchPlaceholder: "أدخل اسم المدينة أو القرية",
+        forecastHourly: "توقعات كل ساعة",
+        forecastDaily: "توقعات ٥ أيام",
+        call: "📞 اتصل بـ 09332356547",
+        cityNotFound: "لم يتم العثور على المدينة."
+      }
+    };
 
-  function toggleLang() {
-    currentLang = currentLang === "fa" ? "ar" : "fa";
-    document.getElementById("title").innerText = labels[currentLang].title;
-    document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
-    document.getElementById("langToggle").innerText = currentLang === "fa" ? "AR" : "FA";
-    document.querySelector(".ad-box a").innerText = labels[currentLang].call;
-    document.querySelectorAll("h3")[0].innerText = labels[currentLang].forecastHourly;
-    document.querySelectorAll("h3")[1].innerText = "پیش‌بینی ۵ روزه";
-  }
-
-  async function searchCity() {
-    const city = document.getElementById("cityInput").value.trim();
-    if (!city) return;
-    const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`);
-    const geoData = await geoRes.json();
-    if (!geoData.length) {
-      alert("شهر مورد نظر پیدا نشد.");
-      return;
+    function toggleLang() {
+      currentLang = currentLang === "fa" ? "ar" : "fa";
+      document.getElementById("title").innerText = labels[currentLang].title;
+      document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
+      document.getElementById("langToggle").innerText = currentLang === "fa" ? "AR" : "FA";
+      document.getElementById("callLink").innerText = labels[currentLang].call;
+      document.getElementById("hourlyTitle").innerText = labels[currentLang].forecastHourly;
+      document.getElementById("dailyTitle").innerText = labels[currentLang].forecastDaily;
     }
 
-    const { lat, lon, name, country } = geoData[0];
-    document.getElementById("cityName").innerText = `${name}, ${country}`;
-    document.getElementById("mapFrame").src =
-      `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.2},${lat - 0.2},${lon + 0.2},${lat + 0.2}&layer=mapnik`;
+    async function searchCity() {
+      const city = document.getElementById("cityInput").value.trim();
+      if (!city) return;
+      try {
+        const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`);
+        const geoData = await geoRes.json();
+        if (!geoData.length) {
+          alert(labels[currentLang].cityNotFound);
+          return;
+        }
 
-    const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=${currentLang}&appid=${API_KEY}`);
-    const weatherData = await weatherRes.json();
-    displayForecast(weatherData);
-  }
+        const { lat, lon, name, country } = geoData[0];
+        document.getElementById("cityName").innerText = `${name}, ${country}`;
+        document.getElementById("mapFrame").src =
+          `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.2},${lat - 0.2},${lon + 0.2},${lat + 0.2}&layer=mapnik`;
 
-  function displayForecast(data) {
-    const dailyDiv = document.getElementById("dailyForecast");
-    const hourlyDiv = document.getElementById("hourlyForecast");
-    dailyDiv.innerHTML = "";
-    hourlyDiv.innerHTML = "";
+        const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=${currentLang}&appid=${API_KEY}`);
+        const weatherData = await weatherRes.json();
 
-    const days = {};
+        displayForecast(weatherData);
+      } catch (e) {
+        alert("خطا در دریافت اطلاعات. لطفا دوباره تلاش کنید.");
+        console.error(e);
+      }
+    }
 
-    data.list.forEach(entry => {
-      const date = entry.dt_txt.split(" ")[0];
-      const hour = entry.dt_txt.split(" ")[1].slice(0, 5);
-      const iconUrl = `https://openweathermap.org/img/wn/${entry.weather[0].icon}@2x.png`;
+    function displayForecast(data) {
+      const dailyDiv = document.getElementById("dailyForecast");
+      const hourlyDiv = document.getElementById("hourlyForecast");
+      dailyDiv.innerHTML = "";
+      hourlyDiv.innerHTML = "";
 
-      if (!days[date]) days[date] = [];
-      days[date].push({ ...entry, hour, iconUrl });
+      const days = {};
 
-      // فقط برای امروز، پیش‌بینی ساعتی اضافه کن
-      if (Object.keys(days).length === 1) {
-        hourlyDiv.innerHTML += `
-          <div class="hour-card">
-            <div>${hour}</div>
-            <img class="weather-icon" src="${iconUrl}" />
-            <div>${entry.main.temp}°C</div>
-            <div>${entry.weather[0].description}</div>
-            <div>💨 ${entry.wind.speed} m/s</div>
+      data.list.forEach(entry => {
+        const date = entry.dt_txt.split(" ")[0];
+        const hour = parseInt(entry.dt_txt.split(" ")[1].slice(0, 2), 10);
+        const iconUrl = `https://openweathermap.org/img/wn/${entry.weather[0].icon}@2x.png`;
+
+        if (!days[date]) days[date] = { day: null, night: null, hours: [] };
+        days[date].hours.push({ ...entry, hour, iconUrl });
+
+        // تفکیک وضعیت روز (06-18) و شب (18-06)
+        if (hour >= 6 && hour < 18) {
+          if (!days[date].day || entry.main.temp > days[date].day.main.temp) {
+            days[date].day = { ...entry, iconUrl };
+          }
+        } else {
+          if (!days[date].night || entry.main.temp < days[date].night.main.temp) {
+            days[date].night = { ...entry, iconUrl };
+          }
+        }
+
+        // نمایش پیش‌بینی ساعتی فقط برای اولین روز
+        if (Object.keys(days).length === 1) {
+          hourlyDiv.innerHTML += `
+            <div class="hour-card" title="${entry.weather[0].description}">
+              <div>${entry.dt_txt.split(" ")[1].slice(0,5)}</div>
+              <img class="weather-icon" src="${iconUrl}" alt="${entry.weather[0].description}" />
+              <div>${entry.main.temp.toFixed(1)}°C</div>
+              <div>${entry.weather[0].description}</div>
+              <div>💨 ${entry.wind.speed} m/s</div>
+            </div>
+          `;
+        }
+      });
+
+      for (const date in days) {
+        const day = days[date].day;
+        const night = days[date].night;
+
+        dailyDiv.innerHTML += `
+          <div class="weather-card" title="پیش‌بینی روز و شب برای ${date}">
+            <div><strong>${date}</strong></div>
+            <div><strong>روز:</strong> ${day ? day.main.temp.toFixed(1) + "°C" : "نامشخص"}</div>
+            ${day ? `<img class="weather-icon" src="${day.iconUrl}" alt="روز">` : ""}
+            <div>${day ? day.weather[0].description : ""}</div>
+
+            <div><strong>شب:</strong> ${night ? night.main.temp.toFixed(1) + "°C" : "نامشخص"}</div>
+            ${night ? `<img class="weather-icon" src="${night.iconUrl}" alt="شب">` : ""}
+            <div>${night ? night.weather[0].description : ""}</div>
           </div>
         `;
       }
-    });
-
-    for (let date in days) {
-      const avgTemp = (
-        days[date].reduce((acc, val) => acc + val.main.temp, 0) / days[date].length
-      ).toFixed(1);
-      const iconUrl = days[date][0].iconUrl;
-
-      dailyDiv.innerHTML += `
-        <div class="weather-card">
-          <div><strong>${date}</strong></div>
-          <img class="weather-icon" src="${iconUrl}" />
-          <div>${avgTemp}°C</div>
-          <div>${days[date][0].weather[0].description}</div>
-        </div>
-      `;
     }
-  }
 
-  window.onload = () => {
-    document.getElementById("cityInput").value = "اهواز";
-    searchCity();
-  };
-</script>
+    window.onload = () => {
+      document.getElementById("cityInput").value = "اهواز";
+      searchCity();
+    };
+  </script>
 </body>
 </html>
