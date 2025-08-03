@@ -1,3 +1,85 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>وضعیت آب‌وهوا</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      direction: rtl;
+      background: #eef;
+      margin: 0;
+      padding: 10px;
+      text-align: center;
+    }
+    h1, h3 {
+      color: #003366;
+    }
+    #cityInput {
+      padding: 10px;
+      width: 80%;
+      max-width: 300px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    .weather-card, .hour-card {
+      background: white;
+      display: inline-block;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      width: 120px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .weather-icon {
+      width: 60px;
+    }
+    .ad-box {
+      margin: 20px auto;
+      background: #ffd;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .ad-box a {
+      text-decoration: none;
+      color: #d00;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    iframe {
+      width: 90%;
+      height: 300px;
+      margin: 15px auto;
+      border: none;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title">وضعیت آب‌وهوا</h1>
+  <input id="cityInput" placeholder="نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)" />
+  <button onclick="searchCity()">🔍 جستجو</button>
+  <button id="langToggle" onclick="toggleLang()">AR</button>
+
+  <div class="ad-box">
+    <a href="tel:09332356547">📞 تماس با 09332356547</a>
+  </div>
+
+  <h2 id="cityName">اهواز</h2>
+
+  <iframe id="mapFrame" src=""></iframe>
+
+  <h3>پیش‌بینی ساعتی</h3>
+  <div id="hourlyForecast"></div>
+
+  <h3>پیش‌بینی ۵ روزه</h3>
+  <div id="dailyForecast"></div>
+
 <script>
   const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88"; // کلید شما
   let currentLang = "fa";
@@ -23,7 +105,8 @@
     document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
     document.getElementById("langToggle").innerText = currentLang === "fa" ? "AR" : "FA";
     document.querySelector(".ad-box a").innerText = labels[currentLang].call;
-    document.querySelector("h3").innerText = labels[currentLang].forecastHourly;
+    document.querySelectorAll("h3")[0].innerText = labels[currentLang].forecastHourly;
+    document.querySelectorAll("h3")[1].innerText = "پیش‌بینی ۵ روزه";
   }
 
   async function searchCity() {
@@ -62,7 +145,7 @@
       if (!days[date]) days[date] = [];
       days[date].push({ ...entry, hour, iconUrl });
 
-      // Add hourly card for today
+      // فقط برای امروز، پیش‌بینی ساعتی اضافه کن
       if (Object.keys(days).length === 1) {
         hourlyDiv.innerHTML += `
           <div class="hour-card">
@@ -93,7 +176,6 @@
     }
   }
 
-  // اجرای اولیه با اهواز
   window.onload = () => {
     document.getElementById("cityInput").value = "اهواز";
     searchCity();
