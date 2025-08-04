@@ -2,195 +2,444 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>هواشناسی پیشرفته</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #e0f7fa;
+      background: #101d2c;
+      color: #fff;
       margin: 0;
       padding: 0;
-      color: #333;
+      direction: rtl;
     }
     header {
-      background-color: #0288d1;
-      color: white;
+      background: linear-gradient(to left, #0077b6, #00b4d8);
       padding: 1rem;
       text-align: center;
-    }
-    .container {
-      padding: 1rem;
-      max-width: 800px;
-      margin: auto;
-    }
-    .controls {
-      margin-bottom: 1rem;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      background: #0097a7;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-    button:hover {
-      background: #00796b;
-    }
-    .forecast {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-    }
-    .day {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
       position: relative;
     }
-    .favorite {
+    #language-toggle {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 18px;
+      left: 1rem;
+      top: 1rem;
+      background: #ff5722;
+      border: none;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #search-container {
+      padding: 1rem;
+      text-align: center;
+    }
+    #searchInput {
+      padding: 0.5rem;
+      width: 70%;
+      border-radius: 5px;
+      border: none;
+      font-size: 1rem;
+      max-width: 400px;
+    }
+    #get-location {
+      margin-left: 10px;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      border: none;
+      background: #00b4d8;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #forecast {
+      max-width: 900px;
+      margin: 1rem auto;
+      padding: 0 1rem;
+    }
+    .day {
+      background: #1a2a3a;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .day:hover {
+      background: #265078;
+    }
+    .star {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 1.5rem;
+      color: gold;
+      user-select: none;
       cursor: pointer;
     }
-    .feedback, .advert {
-      margin-top: 2rem;
-      background: #fff;
+    .hourly {
+      display: none;
+      background: #233447;
+      margin-top: 1rem;
       padding: 1rem;
       border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      max-height: 300px;
+      overflow-y: auto;
     }
-    .language-toggle {
-      float: left;
+    .hourly div {
+      border-bottom: 1px solid #444;
+      padding: 6px 0;
+      font-size: 0.9rem;
+    }
+    .weather-icon {
+      vertical-align: middle;
+      width: 48px;
+      height: 48px;
+      margin-left: 10px;
+    }
+    .favorite-btn {
+      background: #0077b6;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+    #comments-section {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #252525;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    #commentInput {
+      width: 100%;
+      height: 80px;
+      border-radius: 5px;
+      border: none;
+      padding: 0.5rem;
+      resize: vertical;
+      font-size: 1rem;
+    }
+    #submitComment {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #00b4d8;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #commentsContainer {
+      margin-top: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .comment {
+      background: #1a2a3a;
+      padding: 0.6rem;
+      border-radius: 5px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: #bbb;
+      background: #111;
+      margin-top: 2rem;
+    }
+    a {
+      color: #ffcc00;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1 id="title">پیش‌بینی وضعیت هوا</h1>
-    <button class="language-toggle" onclick="toggleLanguage()">🇮🇷 / 🇸🇦</button>
+    <div id="header-title">پیش‌بینی آب‌وهوا</div>
+    <button id="language-toggle">AR</button>
   </header>
 
-  <div class="container">
-    <div class="controls">
-      <input type="text" id="cityInput" placeholder="نام شهر را وارد کنید" />
-      <button onclick="getWeather()">جستجو 🔍</button>
-      <button onclick="getLocationWeather()">📍 موقعیت من</button>
-    </div>
-
-    <div id="weather" class="forecast"></div>
-
-    <div class="advert">
-      <strong>🔗 آگهی تبلیغاتی:</strong><br />
-      جایگاه تبلیغاتی قابل کلیک
-    </div>
-
-    <div class="feedback">
-      <strong>💬 پیشنهادات:</strong>
-      <p>هرگونه پیشنهاد یا انتقاد دارید در اختیار ما بگذارید!</p>
-    </div>
+  <div id="search-container">
+    <input type="text" id="searchInput" placeholder="نام شهر یا روستا را وارد کنید..." />
+    <button id="get-location">📍 موقعیت من</button>
   </div>
 
+  <div id="forecast"></div>
+
+  <div id="comments-section">
+    <h3 id="comments-title">نظرات و پیشنهادات</h3>
+    <textarea id="commentInput" placeholder="نظر خود را اینجا بنویسید..."></textarea>
+    <br />
+    <button id="submitComment">ارسال</button>
+    <div id="commentsContainer"></div>
+  </div>
+
+  <footer>
+    تماس با ما: <a href="tel:09332356547">09332356547</a> |
+    اینستاگرام: <a href="https://instagram.com/mehdi.eidani" target="_blank">@mehdi.eidani</a> |
+    ایمیل: <a href="mailto:mehdi1eidani@gmail.com">mehdi1eidani@gmail.com</a><br />
+    تمام حقوق متعلق به Mehdi Eidani است
+  </footer>
+
   <script>
-    let language = 'fa';
+    const apiKey = "dc9c93f51cdd375d459483c2a9f86d88";
+
+    const langToggle = document.getElementById("language-toggle");
+    const headerTitle = document.getElementById("header-title");
+    const searchInput = document.getElementById("searchInput");
+    const forecastDiv = document.getElementById("forecast");
+    const getLocationBtn = document.getElementById("get-location");
+    const commentInput = document.getElementById("commentInput");
+    const submitCommentBtn = document.getElementById("submitComment");
+    const commentsContainer = document.getElementById("commentsContainer");
+    const commentsTitle = document.getElementById("comments-title");
+
+    let lang = "fa";
 
     const translations = {
       fa: {
-        title: "پیش‌بینی وضعیت هوا",
-        placeholder: "نام شهر را وارد کنید",
-        search: "جستجو 🔍",
-        location: "📍 موقعیت من",
-        favorite: "علاقه‌مندی",
+        header: "پیش‌بینی آب‌وهوا",
+        placeholder: "نام شهر یا روستا را وارد کنید...",
+        locationBtn: "📍 موقعیت من",
+        showHourly: "نمایش ساعتی ▼",
+        hideHourly: "پنهان کردن ▲",
+        commentsTitle: "نظرات و پیشنهادات",
+        commentPlaceholder: "نظر خود را اینجا بنویسید...",
+        sendBtn: "ارسال",
+        alertEmptyComment: "لطفا یک نظر وارد کنید.",
+        alertCommentSaved: "نظر شما ثبت شد.",
+        errorFetch: "❗ خطا در دریافت اطلاعات، دوباره تلاش کنید.",
+        wind: "باد",
+        tempAvg: "دمای میانگین",
+        favoriteAdded: "به علاقه‌مندی‌ها اضافه شد.",
+        favoriteRemoved: "از علاقه‌مندی‌ها حذف شد.",
+        humidity: "رطوبت",
+        pressure: "فشار",
+        status: "وضعیت",
+        hour: "ساعت",
+        temp: "دما"
       },
       ar: {
-        title: "توقعات الطقس",
-        placeholder: "أدخل اسم المدينة",
-        search: "بحث 🔍",
-        location: "📍 موقعي",
-        favorite: "المفضلة",
+        header: "توقعات الطقس",
+        placeholder: "أدخل اسم المدينة أو القرية...",
+        locationBtn: "📍 موقعي",
+        showHourly: "عرض كل ساعة ▼",
+        hideHourly: "إخفاء ▲",
+        commentsTitle: "آراء وملاحظات",
+        commentPlaceholder: "اكتب تعليقك هنا...",
+        sendBtn: "إرسال",
+        alertEmptyComment: "يرجى إدخال تعليق.",
+        alertCommentSaved: "تم حفظ تعليقك.",
+        errorFetch: "❗ خطأ في تحميل البيانات، حاول مرة أخرى.",
+        wind: "الرياح",
+        tempAvg: "متوسط درجة الحرارة",
+        favoriteAdded: "أُضيف إلى المفضلة.",
+        favoriteRemoved: "تم الحذف من المفضلة.",
+        humidity: "الرطوبة",
+        pressure: "الضغط",
+        status: "الحالة",
+        hour: "الساعة",
+        temp: "درجة الحرارة"
       }
     };
 
+    function windDirection(deg) {
+      const directions = lang === "fa"
+        ? ["شمال", "شمال‌شرق", "شرق", "جنوب‌شرق", "جنوب", "جنوب‌غرب", "غرب", "شمال‌غرب"]
+        : ["شمال", "شمال شرق", "شرق", "جنوب شرق", "جنوب", "جنوب غرب", "غرب", "شمال غرب"];
+      return directions[Math.round(deg / 45) % 8];
+    }
+
     function toggleLanguage() {
-      language = (language === 'fa') ? 'ar' : 'fa';
-      document.documentElement.lang = language;
-      document.documentElement.dir = language === 'fa' ? 'rtl' : 'rtl';
-      document.getElementById("title").innerText = translations[language].title;
-      document.getElementById("cityInput").placeholder = translations[language].placeholder;
-      document.querySelector("button[onclick='getWeather()']").innerText = translations[language].search;
-      document.querySelector("button[onclick='getLocationWeather()']").innerText = translations[language].location;
-    }
-
-    const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88"; // کلید خودت از OpenWeather
-
-    function getWeather() {
-      const city = document.getElementById("cityInput").value;
-      if (!city) return;
-      fetchWeatherByCity(city);
-    }
-
-    function getLocationWeather() {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { latitude, longitude } = position.coords;
-        fetchWeatherByCoords(latitude, longitude);
-      });
-    }
-
-    function fetchWeatherByCity(city) {
-      fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${API_KEY}&lang=${language}`)
-        .then(res => res.json())
-        .then(data => showForecast(data.list));
-    }
-
-    function fetchWeatherByCoords(lat, lon) {
-      fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}&lang=${language}`)
-        .then(res => res.json())
-        .then(data => showForecast(data.list));
-    }
-
-    function showForecast(forecastList) {
-      const daily = {};
-      forecastList.forEach(item => {
-        const date = item.dt_txt.split(" ")[0];
-        if (!daily[date]) daily[date] = item;
-      });
-
-      const container = document.getElementById("weather");
-      container.innerHTML = "";
-
-      Object.values(daily).slice(0, 5).forEach(day => {
-        const isFav = localStorage.getItem(day.dt_txt.split(" ")[0]) === "1";
-        container.innerHTML += `
-          <div class="day">
-            <div class="favorite" onclick="toggleFavorite('${day.dt_txt.split(" ")[0]}', this)">
-              ${isFav ? '⭐' : '☆'}
-            </div>
-            <h3>${new Date(day.dt_txt).toLocaleDateString(language)}</h3>
-            <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}" />
-            <p>${day.weather[0].description}</p>
-            <p>${day.main.temp}°C</p>
-          </div>
-        `;
-      });
-    }
-
-    function toggleFavorite(date, el) {
-      const current = localStorage.getItem(date);
-      if (current === "1") {
-        localStorage.removeItem(date);
-        el.innerText = "☆";
-      } else {
-        localStorage.setItem(date, "1");
-        el.innerText = "⭐";
+      lang = lang === "fa" ? "ar" : "fa";
+      langToggle.textContent = lang === "fa" ? "AR" : "FA";
+      headerTitle.textContent = translations[lang].header;
+      searchInput.placeholder = translations[lang].placeholder;
+      getLocationBtn.textContent = translations[lang].locationBtn;
+      commentsTitle.textContent = translations[lang].commentsTitle;
+      commentInput.placeholder = translations[lang].commentPlaceholder;
+      submitCommentBtn.textContent = translations[lang].sendBtn;
+      // Refresh forecast if any city shown
+      if (searchInput.value.trim() !== "") {
+        fetchWeather(searchInput.value.trim());
       }
     }
+
+    langToggle.addEventListener("click", toggleLanguage);
+
+    function saveFavorite(day) {
+      localStorage.setItem("fav_" + day, "1");
+    }
+    function removeFavorite(day) {
+      localStorage.removeItem("fav_" + day);
+    }
+    function isFavorite(day) {
+      return localStorage.getItem("fav_" + day) === "1";
+    }
+
+    function toggleFavorite(day, starElement) {
+      if (isFavorite(day)) {
+        removeFavorite(day);
+        starElement.textContent = "☆";
+        alert(translations[lang].favoriteRemoved);
+      } else {
+        saveFavorite(day);
+        starElement.textContent = "★";
+        alert(translations[lang].favoriteAdded);
+      }
+    }
+
+    async function fetchWeather(city) {
+      forecastDiv.innerHTML = lang === "fa" ? "در حال دریافت اطلاعات..." : "جارٍ تحميل البيانات...";
+      try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=${lang}`);
+        const data = await res.json();
+        if (!data.list) throw new Error();
+        displayForecast(data.list);
+      } catch {
+        forecastDiv.innerHTML = translations[lang].errorFetch;
+      }
+    }
+
+    function displayForecast(list) {
+      // گروه بندی داده‌ها بر اساس روز
+      const days = {};
+      list.forEach(item => {
+        const day = item.dt_txt.split(" ")[0];
+        if (!days[day]) days[day] = [];
+        days[day].push(item);
+      });
+
+      forecastDiv.innerHTML = "";
+      Object.keys(days).slice(0, 5).forEach(day => {
+        const dayItems = days[day];
+        const firstItem = dayItems[0];
+        const isFav = isFavorite(day);
+        const star = isFav ? "★" : "☆";
+
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "day";
+
+        dayDiv.innerHTML = `
+          <div class="star" title="علاقه‌مندی">${star}</div>
+          <div><strong>${lang === "fa" ? "روز" : "اليوم"}: ${day}</strong></div>
+          <div>
+            <img class="weather-icon" src="https://openweathermap.org/img/wn/${firstItem.weather[0].icon}@2x.png" alt="${firstItem.weather[0].description}" />
+            ${firstItem.weather[0].description}
+          </div>
+          <div>${translations[lang].tempAvg}: ${firstItem.main.temp}°C</div>
+          <div>${translations[lang].wind}: ${firstItem.wind.speed} km/h - ${windDirection(firstItem.wind.deg)}</div>
+          <button class="favorite-btn">${translations[lang].showHourly}</button>
+          <div class="hourly"></div>
+        `;
+
+        // اضافه کردن لیست ساعتی
+        const hourlyDiv = dayDiv.querySelector(".hourly");
+        hourlyDiv.innerHTML = dayItems.map(item => `
+          <div>
+            ${translations[lang].hour}: ${item.dt_txt.split(" ")[1].slice(0,5)} |
+            ${translations[lang].temp}: ${item.main.temp}°C |
+            ${translations[lang].humidity}: ${item.main.humidity}% |
+            ${translations[lang].pressure}: ${item.main.pressure} hPa |
+            ${translations[lang].wind}: ${item.wind.speed} km/h - ${windDirection(item.wind.deg)} |
+            ${translations[lang].status}: ${item.weather[0].description}
+          </div>
+        `).join("");
+
+        forecastDiv.appendChild(dayDiv);
+
+        // رویدادها
+        const starEl = dayDiv.querySelector(".star");
+        starEl.addEventListener("click", () => toggleFavorite(day, starEl));
+
+        const toggleBtn = dayDiv.querySelector(".favorite-btn");
+        toggleBtn.addEventListener("click", () => {
+          if (hourlyDiv.style.display === "block") {
+            hourlyDiv.style.display = "none";
+            toggleBtn.textContent = translations[lang].showHourly;
+          } else {
+            hourlyDiv.style.display = "block";
+            toggleBtn.textContent = translations[lang].hideHourly;
+          }
+        });
+      });
+    }
+
+    // رویداد جستجو با اینتر
+    searchInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        const city = searchInput.value.trim();
+        if (city) fetchWeather(city);
+      }
+    });
+
+    // دکمه موقعیت من
+    getLocationBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert(lang === "fa" ? "مرورگر شما از GPS پشتیبانی نمی‌کند." : "المتصفح لا يدعم GPS.");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=${lang}`)
+          .then(res => res.json())
+          .then(data => {
+            if (!data.list) throw new Error();
+            searchInput.value = data.city.name;
+            displayForecast(data.list);
+          })
+          .catch(() => {
+            alert(lang === "fa" ? "خطا در دریافت اطلاعات موقعیت." : "خطأ في تحميل بيانات الموقع.");
+          });
+      }, () => {
+        alert(lang === "fa" ? "دسترسی به موقعیت رد شد." : "تم رفض الوصول للموقع.");
+      });
+    });
+
+    // بخش نظرات
+    function loadComments() {
+      const comments = JSON.parse(localStorage.getItem("comments") || "[]");
+      commentsContainer.innerHTML = "";
+      comments.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "comment";
+        div.textContent = c;
+        commentsContainer.appendChild(div);
+      });
+    }
+
+    submitCommentBtn.addEventListener("click", () => {
+      const val = commentInput.value.trim();
+      if (!val) {
+        alert(translations[lang].alertEmptyComment);
+        return;
+      }
+      const comments = JSON.parse(localStorage.getItem("comments") || "[]");
+      comments.push(val);
+      localStorage.setItem("comments", JSON.stringify(comments));
+      commentInput.value = "";
+      loadComments();
+      alert(translations[lang].alertCommentSaved);
+    });
+
+    loadComments();
+
+    // بارگذاری پیش‌فرض
+    fetchWeather("اهواز");
   </script>
 </body>
 </html>
