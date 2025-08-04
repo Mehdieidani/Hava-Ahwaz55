@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>هواشناسی پیشرفته با ثبت نام و چت خصوصی</title>
+<title>هواشناسی پیشرفته با ثبت‌نام اختیاری و چت</title>
 <style>
-  /* تنظیمات پایه */
   body {
     font-family: 'Tahoma', sans-serif;
     margin: 0; padding: 0;
@@ -25,10 +24,10 @@
   button {
     cursor: pointer;
   }
-  /* دکمه زبان و تنظیمات */
-  #language-toggle, #settings-btn {
+  #settings-btn {
     position: absolute;
     top: 1rem;
+    left: 1rem;
     background: #ff5722;
     border: none;
     color: white;
@@ -36,65 +35,23 @@
     border-radius: 5px;
     font-weight: bold;
   }
-  #language-toggle { left: 1rem; }
-  #settings-btn { left: 5.5rem; }
-
-  /* کانتینر صفحه */
   #container {
     max-width: 900px;
     margin: 1rem auto;
     padding: 0 1rem;
   }
-
-  /* فرم ثبت نام / ورود */
-  #auth-section {
+  #weather-section {
     background: #023047;
     border-radius: 10px;
     padding: 1rem;
     margin-bottom: 1rem;
+    min-height: 150px;
   }
-  #auth-section h2 {
-    margin-top: 0;
-  }
-  #auth-section input, #auth-section select {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.3rem 0 1rem 0;
-    border-radius: 5px;
-    border: none;
-    font-size: 1rem;
-  }
-  #auth-section label {
-    display: block;
-    margin-bottom: 0.3rem;
-  }
-  #auth-section .error {
-    color: #f44336;
-    margin-bottom: 1rem;
-  }
-  #auth-section button {
-    background: #ffb703;
-    border: none;
-    color: #023047;
-    font-weight: bold;
-    padding: 0.7rem;
-    border-radius: 5px;
-    width: 100%;
-  }
-  #auth-toggle {
-    margin-top: 0.5rem;
-    text-align: center;
-    color: #ffb703;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  /* چت خصوصی */
   #chat-section {
     background: #023047;
     border-radius: 10px;
     padding: 1rem;
-    display: none;
+    display: flex;
     flex-direction: column;
     height: 400px;
   }
@@ -123,6 +80,12 @@
     color: #023047;
     align-self: flex-end;
   }
+  .message.guest {
+    background: #ddd;
+    color: #333;
+    align-self: center;
+    font-style: italic;
+  }
   #chat-input {
     display: flex;
   }
@@ -142,8 +105,6 @@
     font-weight: bold;
     border-radius: 0 5px 5px 0;
   }
-
-  /* بخش تنظیمات */
   #settings-modal {
     position: fixed;
     top: 50%; left: 50%;
@@ -154,7 +115,9 @@
     box-shadow: 0 0 10px #0008;
     display: none;
     z-index: 1000;
-    width: 320px;
+    width: 350px;
+    max-height: 90vh;
+    overflow-y: auto;
   }
   #settings-modal h3 {
     margin-top: 0;
@@ -165,24 +128,50 @@
     display: block;
     margin: 0.5rem 0 0.2rem 0;
   }
-  #settings-modal select, #settings-modal input[type=range] {
+  #settings-modal input[type=text],
+  #settings-modal input[type=password],
+  #settings-modal input[type=tel],
+  #settings-modal select {
     width: 100%;
-    padding: 0.3rem;
+    padding: 0.4rem;
     border-radius: 5px;
     border: none;
+    font-size: 1rem;
+  }
+  #settings-modal input[type=range] {
+    width: 100%;
   }
   #settings-modal button.close-settings {
     margin-top: 1rem;
     background: #ff5722;
     border: none;
     color: white;
-    padding: 0.5rem;
+    padding: 0.6rem;
     width: 100%;
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
   }
-
+  #settings-modal button.action-btn {
+    background: #ffb703;
+    border: none;
+    color: #023047;
+    padding: 0.6rem;
+    width: 100%;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  #settings-modal .error {
+    color: #f44336;
+    margin-bottom: 0.5rem;
+  }
+  #user-info {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-weight: bold;
+  }
   /* تم تاریک */
   body.dark {
     background: #011627;
@@ -191,7 +180,7 @@
   body.dark header {
     background: linear-gradient(to left, #001f3f, #004080);
   }
-  body.dark #auth-section,
+  body.dark #weather-section,
   body.dark #chat-section,
   body.dark #settings-modal {
     background: #001f3f;
@@ -200,13 +189,11 @@
   body.dark #chat-messages {
     background: #001733;
   }
-
   /* فونت‌ها */
   body.font-tahoma { font-family: 'Tahoma', sans-serif; }
   body.font-vazir { font-family: 'Vazir', sans-serif; }
   body.font-irsans { font-family: 'IRANSans', sans-serif; }
   body.font-sahel { font-family: 'Sahel', sans-serif; }
-
 </style>
 
 <!-- فونت‌های وب -->
@@ -219,43 +206,19 @@
 
 <header>
   هواشناسی پیشرفته
-  <button id="language-toggle">AR</button>
   <button id="settings-btn" title="تنظیمات">⚙️</button>
 </header>
 
 <div id="container">
 
-  <!-- فرم ثبت نام و ورود -->
-  <section id="auth-section">
-    <h2 id="auth-title">ثبت نام</h2>
-    <div class="error" id="auth-error"></div>
-    <form id="auth-form">
-      <label for="phone">شماره موبایل:</label>
-      <input type="tel" id="phone" name="phone" placeholder="مثال: 09123456789" required pattern="09[0-9]{9}" />
-      
-      <label for="password">رمز عبور:</label>
-      <input type="password" id="password" name="password" required minlength="6" />
-
-      <label for="password-repeat" id="label-repeat">تکرار رمز عبور:</label>
-      <input type="password" id="password-repeat" name="password-repeat" required minlength="6" />
-
-      <label for="recovery-question">سوال بازیابی رمز (مثلا اولین مدرسه شما؟):</label>
-      <input type="text" id="recovery-question" name="recovery-question" required />
-
-      <button type="submit" id="auth-submit">ثبت نام</button>
-    </form>
-    <div id="auth-toggle">حالا وارد شوید</div>
-  </section>
-
-  <!-- بخش هواشناسی (همیشه نمایش داده می‌شود) -->
+  <!-- بخش هواشناسی -->
   <section id="weather-section">
     <div id="weather-app">
-      <!-- اینجا کد هواشناسی شما قرار می‌گیرد -->
       <p>اینجا پیش‌بینی هواشناسی قرار می‌گیرد...</p>
     </div>
   </section>
 
-  <!-- بخش چت خصوصی (فقط بعد از ورود فعال می‌شود) -->
+  <!-- بخش چت (همیشه فعال) -->
   <section id="chat-section">
     <div id="chat-messages"></div>
     <div id="chat-input">
@@ -269,6 +232,35 @@
 <!-- پنجره تنظیمات -->
 <div id="settings-modal">
   <h3>تنظیمات</h3>
+
+  <!-- ثبت نام / ورود -->
+  <div id="auth-container">
+    <div id="auth-error" class="error"></div>
+    <form id="auth-form">
+      <label for="phone">شماره موبایل:</label>
+      <input type="tel" id="phone" name="phone" placeholder="مثال: 09123456789" pattern="09[0-9]{9}" />
+
+      <label for="password">رمز عبور:</label>
+      <input type="password" id="password" name="password" minlength="6" />
+
+      <div id="register-fields" style="display:none;">
+        <label for="password-repeat">تکرار رمز عبور:</label>
+        <input type="password" id="password-repeat" name="password-repeat" minlength="6" />
+
+        <label for="recovery-question">سوال بازیابی رمز:</label>
+        <input type="text" id="recovery-question" name="recovery-question" />
+      </div>
+
+      <button type="submit" class="action-btn" id="auth-submit">ورود</button>
+    </form>
+    <div id="auth-toggle" style="text-align:center; margin-top: 10px; cursor:pointer; color:#ffb703;">ثبت نام کنید</div>
+    <div id="user-info"></div>
+    <button id="logout-btn" class="action-btn" style="display:none; background:#f44336;">خروج از حساب</button>
+  </div>
+
+  <hr style="margin: 1rem 0; border-color: #ffb703;" />
+
+  <!-- تنظیمات ظاهری -->
   <label for="theme-select">تم:</label>
   <select id="theme-select">
     <option value="light">روشن</option>
@@ -290,192 +282,11 @@
 </div>
 
 <script>
-  // --- تنظیمات پایه ---
-
-  const authSection = document.getElementById('auth-section');
-  const weatherSection = document.getElementById('weather-section');
-  const chatSection = document.getElementById('chat-section');
-  const chatMessages = document.getElementById('chat-messages');
-  const chatText = document.getElementById('chat-text');
-  const chatSendBtn = document.getElementById('chat-send');
-  const authForm = document.getElementById('auth-form');
-  const authError = document.getElementById('auth-error');
-  const authTitle = document.getElementById('auth-title');
-  const authToggle = document.getElementById('auth-toggle');
-  const passwordRepeatLabel = document.getElementById('label-repeat');
-  const passwordRepeatInput = document.getElementById('password-repeat');
-
   const settingsBtn = document.getElementById('settings-btn');
   const settingsModal = document.getElementById('settings-modal');
-  const themeSelect = document.getElementById('theme-select');
-  const fontSelect = document.getElementById('font-select');
-  const fontSizeRange = document.getElementById('font-size-range');
   const closeSettingsBtn = document.querySelector('.close-settings');
 
-  let isRegisterMode = true;
-  let currentUser = null;
-
-  // --- کار با LocalStorage برای کاربران ---
-  function getUsers() {
-    return JSON.parse(localStorage.getItem('users') || '{}');
-  }
-  function saveUsers(users) {
-    localStorage.setItem('users', JSON.stringify(users));
-  }
-
-  // --- ثبت نام ---
-  function registerUser(phone, password, recoveryQuestion) {
-    const users = getUsers();
-    if(users[phone]) {
-      return { success: false, message: 'این شماره قبلاً ثبت شده است.' };
-    }
-    users[phone] = {
-      password,
-      recoveryQuestion,
-      messages: []
-    };
-    saveUsers(users);
-    return { success: true };
-  }
-
-  // --- ورود ---
-  function loginUser(phone, password) {
-    const users = getUsers();
-    if(!users[phone]) {
-      return { success: false, message: 'این شماره ثبت نشده است.' };
-    }
-    if(users[phone].password !== password) {
-      return { success: false, message: 'رمز عبور اشتباه است.' };
-    }
-    return { success: true, user: users[phone] };
-  }
-
-  // --- ارسال پیام (ذخیره پیام‌ها در LocalStorage برای هر کاربر) ---
-  function saveMessage(phone, message, sender) {
-    const users = getUsers();
-    if(!users[phone]) return;
-    users[phone].messages.push({ sender, text: message, time: new Date().toISOString() });
-    saveUsers(users);
-  }
-
-  // --- بارگذاری پیام‌ها ---
-  function loadMessages(phone) {
-    const users = getUsers();
-    if(!users[phone]) return [];
-    return users[phone].messages || [];
-  }
-
-  // --- نمایش پیام‌ها ---
-  function renderMessages(messages) {
-    chatMessages.innerHTML = "";
-    messages.forEach(msg => {
-      const div = document.createElement('div');
-      div.classList.add('message');
-      div.classList.add(msg.sender === 'user' ? 'user' : 'admin');
-      const time = new Date(msg.time).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
-      div.textContent = `[${time}] ${msg.text}`;
-      chatMessages.appendChild(div);
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  // --- سوئیچ ثبت نام/ورود ---
-  authToggle.addEventListener('click', () => {
-    isRegisterMode = !isRegisterMode;
-    authError.textContent = '';
-    if(isRegisterMode) {
-      authTitle.textContent = 'ثبت نام';
-      authSubmit.textContent = 'ثبت نام';
-      passwordRepeatLabel.style.display = 'block';
-      passwordRepeatInput.style.display = 'block';
-      authToggle.textContent = 'حالا وارد شوید';
-    } else {
-      authTitle.textContent = 'ورود';
-      authSubmit.textContent = 'ورود';
-      passwordRepeatLabel.style.display = 'none';
-      passwordRepeatInput.style.display = 'none';
-      authToggle.textContent = 'ثبت نام کنید';
-    }
-  });
-
-  // --- ارسال فرم ثبت نام / ورود ---
-  const authSubmit = document.getElementById('auth-submit');
-  authForm.addEventListener('submit', e => {
-    e.preventDefault();
-    authError.textContent = '';
-
-    const phone = authForm.phone.value.trim();
-    const password = authForm.password.value.trim();
-    const passwordRepeat = authForm['password-repeat'].value.trim();
-    const recoveryQuestion = authForm['recovery-question'].value.trim();
-
-    if(isRegisterMode){
-      if(password !== passwordRepeat){
-        authError.textContent = 'رمز عبور و تکرار آن مطابقت ندارند.';
-        return;
-      }
-      if(password.length < 6){
-        authError.textContent = 'رمز عبور باید حداقل 6 کاراکتر باشد.';
-        return;
-      }
-      const res = registerUser(phone, password, recoveryQuestion);
-      if(!res.success){
-        authError.textContent = res.message;
-        return;
-      }
-      alert('ثبت نام با موفقیت انجام شد. حالا وارد شوید.');
-      isRegisterMode = false;
-      authToggle.click();
-      authForm.reset();
-    } else {
-      const res = loginUser(phone, password);
-      if(!res.success){
-        authError.textContent = res.message;
-        return;
-      }
-      currentUser = phone;
-      authSection.style.display = 'none';
-      chatSection.style.display = 'flex';
-      loadAndRenderMessages();
-      applySettingsFromStorage();
-    }
-  });
-
-  // --- بارگذاری و نمایش پیام‌ها ---
-  function loadAndRenderMessages(){
-    if(!currentUser) return;
-    const messages = loadMessages(currentUser);
-    renderMessages(messages);
-  }
-
-  // --- ارسال پیام در چت ---
-  chatSendBtn.addEventListener('click', () => {
-    const text = chatText.value.trim();
-    if(text === '') return;
-    // ذخیره پیام کاربر
-    saveMessage(currentUser, text, 'user');
-    renderMessages(loadMessages(currentUser));
-    chatText.value = '';
-
-    // شبیه‌سازی پاسخ شما (ادمین)
-    setTimeout(() => {
-      const adminReply = "پیام شما دریافت شد. در اسرع وقت پاسخ می‌دهیم.";
-      saveMessage(currentUser, adminReply, 'admin');
-      renderMessages(loadMessages(currentUser));
-    }, 1000);
-  });
-
-  // ارسال با اینتر در textarea چت
-  chatText.addEventListener('keydown', e => {
-    if(e.key === 'Enter' && !e.shiftKey){
-      e.preventDefault();
-      chatSendBtn.click();
-    }
-  });
-
-  // --- تنظیمات ---
-
-  // باز/بسته کردن مودال تنظیمات
+  // باز و بسته کردن پنل تنظیمات
   settingsBtn.addEventListener('click', () => {
     settingsModal.style.display = 'block';
   });
@@ -483,7 +294,11 @@
     settingsModal.style.display = 'none';
   });
 
-  // تغییر تم
+  // --- تنظیمات ظاهری ---
+  const themeSelect = document.getElementById('theme-select');
+  const fontSelect = document.getElementById('font-select');
+  const fontSizeRange = document.getElementById('font-size-range');
+
   themeSelect.addEventListener('change', () => {
     if(themeSelect.value === 'dark'){
       document.body.classList.add('dark');
@@ -492,21 +307,16 @@
     }
     localStorage.setItem('theme', themeSelect.value);
   });
-
-  // تغییر فونت
   fontSelect.addEventListener('change', () => {
     document.body.classList.remove('font-tahoma','font-vazir','font-irsans','font-sahel');
     document.body.classList.add(fontSelect.value);
     localStorage.setItem('font', fontSelect.value);
   });
-
-  // تغییر اندازه فونت
   fontSizeRange.addEventListener('input', () => {
     document.body.style.fontSize = fontSizeRange.value + 'px';
     localStorage.setItem('fontSize', fontSizeRange.value);
   });
 
-  // بارگذاری تنظیمات ذخیره شده
   function applySettingsFromStorage(){
     const theme = localStorage.getItem('theme') || 'light';
     themeSelect.value = theme;
@@ -523,23 +333,202 @@
     document.body.style.fontSize = fontSize + 'px';
   }
 
-  // بارگذاری تنظیمات هنگام لود صفحه
-  window.addEventListener('load', () => {
-    applySettingsFromStorage();
-  });
+  window.addEventListener('load', applySettingsFromStorage);
 
-  // دکمه تغییر زبان (فارسی/عربی) - فقط نمایشی
-  const languageToggle = document.getElementById('language-toggle');
-  languageToggle.addEventListener('click', () => {
-    if(languageToggle.textContent === 'AR'){
-      languageToggle.textContent = 'FA';
-      alert('زبان به عربی تغییر کرد (نمایشی)');
-      // اینجا می‌توانید ترجمه‌ها یا تغییرات زبان را اضافه کنید
+  // --- ثبت‌نام و ورود ---
+
+  const authForm = document.getElementById('auth-form');
+  const authToggle = document.getElementById('auth-toggle');
+  const authError = document.getElementById('auth-error');
+  const registerFields = document.getElementById('register-fields');
+  const authSubmit = document.getElementById('auth-submit');
+  const userInfo = document.getElementById('user-info');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  let isRegisterMode = false; // حالت فعلی: ورود
+  let currentUser = null;
+
+  // دریافت کاربران از localStorage
+  function getUsers() {
+    return JSON.parse(localStorage.getItem('users') || '{}');
+  }
+  function saveUsers(users) {
+    localStorage.setItem('users', JSON.stringify(users));
+  }
+
+  // ثبت نام کاربر
+  function registerUser(phone, password, recoveryQuestion) {
+    const users = getUsers();
+    if(users[phone]) return { success:false, message: 'این شماره قبلاً ثبت شده است.' };
+    users[phone] = { password, recoveryQuestion, messages: [] };
+    saveUsers(users);
+    return { success:true };
+  }
+
+  // ورود کاربر
+  function loginUser(phone, password) {
+    const users = getUsers();
+    if(!users[phone]) return { success:false, message: 'این شماره ثبت نشده است.' };
+    if(users[phone].password !== password) return { success:false, message: 'رمز عبور اشتباه است.' };
+    return { success:true, user: users[phone] };
+  }
+
+  // ذخیره پیام برای کاربر
+  function saveMessage(phone, message, sender) {
+    const users = getUsers();
+    if(!users[phone]) return;
+    users[phone].messages.push({ sender, text: message, time: new Date().toISOString() });
+    saveUsers(users);
+  }
+
+  // بارگذاری پیام‌ها برای کاربر
+  function loadMessages(phone) {
+    const users = getUsers();
+    if(!users[phone]) return [];
+    return users[phone].messages || [];
+  }
+
+  // نمایش پیام‌ها در چت
+  const chatMessages = document.getElementById('chat-messages');
+  function renderMessages(messages) {
+    chatMessages.innerHTML = "";
+    messages.forEach(msg => {
+      const div = document.createElement('div');
+      div.classList.add('message');
+      div.classList.add(msg.sender === 'user' ? 'user' : 'admin');
+      const time = new Date(msg.time).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
+      div.textContent = `[${time}] ${msg.text}`;
+      chatMessages.appendChild(div);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // حالت ثبت نام / ورود
+  authToggle.addEventListener('click', () => {
+    isRegisterMode = !isRegisterMode;
+    authError.textContent = '';
+    if(isRegisterMode){
+      authSubmit.textContent = 'ثبت نام';
+      registerFields.style.display = 'block';
+      authToggle.textContent = 'ورود کنید';
     } else {
-      languageToggle.textContent = 'AR';
-      alert('زبان به فارسی تغییر کرد (نمایشی)');
+      authSubmit.textContent = 'ورود';
+      registerFields.style.display = 'none';
+      authToggle.textContent = 'ثبت نام کنید';
     }
   });
+
+  // ثبت نام یا ورود
+  authForm.addEventListener('submit', e => {
+    e.preventDefault();
+    authError.textContent = '';
+
+    const phone = authForm.phone.value.trim();
+    const password = authForm.password.value.trim();
+
+    if(isRegisterMode){
+      const passwordRepeat = authForm['password-repeat'].value.trim();
+      const recoveryQuestion = authForm['recovery-question'].value.trim();
+
+      if(!phone || !password || !passwordRepeat || !recoveryQuestion){
+        authError.textContent = 'لطفاً همه فیلدها را پر کنید.';
+        return;
+      }
+      if(password !== passwordRepeat){
+        authError.textContent = 'رمز عبور و تکرار آن مطابقت ندارند.';
+        return;
+      }
+      if(password.length < 6){
+        authError.textContent = 'رمز عبور باید حداقل 6 کاراکتر باشد.';
+        return;
+      }
+      const res = registerUser(phone, password, recoveryQuestion);
+      if(!res.success){
+        authError.textContent = res.message;
+        return;
+      }
+      alert('ثبت نام موفقیت‌آمیز بود. لطفاً وارد شوید.');
+      isRegisterMode = false;
+      authToggle.click();
+      authForm.reset();
+    } else {
+      if(!phone || !password){
+        authError.textContent = 'شماره موبایل و رمز عبور را وارد کنید.';
+        return;
+      }
+      const res = loginUser(phone, password);
+      if(!res.success){
+        authError.textContent = res.message;
+        return;
+      }
+      currentUser = phone;
+      userInfo.textContent = `کاربر: ${currentUser}`;
+      logoutBtn.style.display = 'block';
+      authForm.style.display = 'none';
+      authToggle.style.display = 'none';
+      authError.textContent = '';
+      settingsModal.style.display = 'none';
+      loadAndRenderMessages();
+    }
+  });
+
+  // خروج
+  logoutBtn.addEventListener('click', () => {
+    currentUser = null;
+    userInfo.textContent = '';
+    logoutBtn.style.display = 'none';
+    authForm.style.display = 'block';
+    authToggle.style.display = 'block';
+    chatMessages.innerHTML = '';
+  });
+
+  // ارسال پیام در چت
+  const chatSendBtn = document.getElementById('chat-send');
+  const chatText = document.getElementById('chat-text');
+
+  chatSendBtn.addEventListener('click', () => {
+    const text = chatText.value.trim();
+    if(!text) return;
+
+    const time = new Date().toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
+
+    if(currentUser){
+      // ذخیره پیام برای کاربر
+      saveMessage(currentUser, text, 'user');
+      appendMessage({sender:'user', text, time: new Date().toISOString()});
+    } else {
+      // برای مهمان، فقط نمایش میده بدون ذخیره
+      appendGuestMessage(text, time);
+    }
+
+    chatText.value = '';
+  });
+
+  // اضافه کردن پیام کاربر
+  function appendMessage(msg) {
+    const div = document.createElement('div');
+    div.classList.add('message', msg.sender === 'user' ? 'user' : 'admin');
+    const time = new Date(msg.time).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
+    div.textContent = `[${time}] ${msg.text}`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // اضافه کردن پیام مهمان (بدون ذخیره)
+  function appendGuestMessage(text, time) {
+    const div = document.createElement('div');
+    div.classList.add('message', 'guest');
+    div.textContent = `[${time}] ${text}`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // بارگذاری پیام‌ها برای کاربر و نمایش
+  function loadAndRenderMessages(){
+    if(!currentUser) return;
+    const messages = loadMessages(currentUser);
+    renderMessages(messages);
+  }
 
 </script>
 
