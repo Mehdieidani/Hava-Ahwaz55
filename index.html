@@ -87,6 +87,13 @@
       margin: 1rem;
       border-radius: 8px;
     }
+    .comment-box {
+      margin-top: 1rem;
+      background-color: #333;
+      padding: 0.5rem;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
     footer {
       text-align: center;
       background-color: #111;
@@ -103,32 +110,30 @@
     <input type="text" id="searchInput" placeholder="نام شهر یا روستا را وارد کنید..." />
   </div>
 
+  <div id="forecast" class="forecast"></div>
+
+  <div class="feedback">
+    <h3>نظرات و پیشنهادات</h3>
+    <textarea rows="3" id="commentInput" style="width:100%;"></textarea>
+    <br/>
+    <button class="favorite-btn" id="submitComment">ارسال</button>
+    <div id="commentsContainer"></div>
+  </div>
+
   <div class="advert">
     تماس با ما: <a href="tel:09332356547">09332356547</a><br>
     اینستاگرام: <a href="https://instagram.com/mehdi.eidani" target="_blank">@mehdi.eidani</a><br>
     ایمیل: <a href="mailto:mehdi1eidani@gmail.com">mehdi1eidani@gmail.com</a>
   </div>
 
-  <div id="forecast" class="forecast">
-    <!-- پیش‌بینی روزانه به‌صورت داینامیک بارگذاری خواهد شد -->
-  </div>
-
-  <div class="feedback">
-    <h3>نظرات و پیشنهادات</h3>
-    <textarea rows="3" style="width:100%;"></textarea>
-    <br/>
-    <button class="favorite-btn">ارسال</button>
-  </div>
-
   <footer>تمام حقوق متعلق به Mehdi Eidani است</footer>
 
   <script>
-    const apiKey = "dc9c93f51cdd375d459483c2a9f86d88"; // کلید کاربر
+    const apiKey = "dc9c93f51cdd375d459483c2a9f86d88";
     const forecastDiv = document.getElementById("forecast");
     const searchInput = document.getElementById("searchInput");
     const langToggle = document.getElementById("language-toggle");
     const headerTitle = document.getElementById("header-title");
-
     let lang = "fa";
 
     function windDirection(deg) {
@@ -187,6 +192,39 @@
       }
     }
 
+    // نظرات
+    const commentInput = document.getElementById("commentInput");
+    const submitComment = document.getElementById("submitComment");
+    const commentsContainer = document.getElementById("commentsContainer");
+
+    function loadComments() {
+      const comments = JSON.parse(localStorage.getItem("comments") || "[]");
+      commentsContainer.innerHTML = "";
+      comments.forEach((c, i) => {
+        const div = document.createElement("div");
+        div.className = "comment-box";
+        div.textContent = `💬 ${c}`;
+        commentsContainer.appendChild(div);
+      });
+    }
+
+    submitComment.addEventListener("click", () => {
+      const val = commentInput.value.trim();
+      if (val) {
+        const comments = JSON.parse(localStorage.getItem("comments") || "[]");
+        comments.push(val);
+        localStorage.setItem("comments", JSON.stringify(comments));
+        commentInput.value = "";
+        loadComments();
+        alert("✅ نظر شما ذخیره شد.");
+      } else {
+        alert("لطفاً یک نظر وارد کنید.");
+      }
+    });
+
+    loadComments();
+
+    // جستجو
     searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         const val = searchInput.value.trim();
