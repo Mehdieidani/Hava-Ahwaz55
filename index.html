@@ -1,266 +1,206 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>پیش‌بینی هواشناسی پیشرفته</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>هواشناسی پیشرفته</title>
   <style>
     body {
-      margin: 0;
       font-family: 'Vazirmatn', sans-serif;
-      background: #111;
-      color: #eee;
+      background: #1c1c1c;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
     }
     header {
-      background: #222;
+      background: linear-gradient(to left, #ff4500, #ffffff, #d32f2f);
       padding: 1rem;
       text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
     }
-    #searchBox {
+    #search {
+      text-align: center;
+      padding: 1rem;
+    }
+    input[type="text"] {
       padding: 0.5rem;
       width: 80%;
-      max-width: 300px;
-      margin-top: 0.5rem;
       border-radius: 5px;
+      border: none;
+      font-size: 1rem;
     }
-    .lang-toggle, .settings {
+    #language-toggle {
       position: absolute;
+      left: 1rem;
       top: 1rem;
-      font-size: 0.9rem;
+      padding: 0.4rem 1rem;
+      background-color: #ff5722;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
     }
-    .lang-toggle {
-      left: 1rem;
-    }
-    .settings {
-      right: 1rem;
-    }
-    .weather-card {
-      background: #1c1c1c;
-      border-radius: 8px;
+    .forecast {
       padding: 1rem;
-      margin: 1rem;
     }
-    .forecast-hourly {
+    .day {
+      background-color: #2c2c2c;
+      margin: 1rem auto;
+      padding: 1rem;
+      border-radius: 8px;
+      width: 90%;
+      cursor: pointer;
+    }
+    .hourly {
       display: none;
       margin-top: 1rem;
-      padding: 0.5rem;
-      background: #191919;
-      border-radius: 6px;
-    }
-    .forecast-day {
-      cursor: pointer;
-      margin-bottom: 1rem;
-      background: #2a2a2a;
-      border-radius: 8px;
+      background-color: #333;
       padding: 1rem;
+      border-radius: 5px;
     }
-    .forecast-day:hover {
-      background: #444;
+    .weather-icon {
+      width: 48px;
+      height: 48px;
     }
-    .icon {
-      width: 50px;
-      vertical-align: middle;
+    .advert {
+      background: #ffcc00;
+      color: #000;
+      text-align: center;
+      padding: 1rem;
+      margin: 1rem;
+      border-radius: 8px;
     }
     .favorite-btn {
-      color: gold;
-      font-size: 1.2rem;
+      background: #ff5722;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.3rem 0.8rem;
+      margin-top: 0.5rem;
       cursor: pointer;
+    }
+    .feedback {
+      padding: 1rem;
+      background: #252525;
+      margin: 1rem;
+      border-radius: 8px;
     }
     footer {
       text-align: center;
+      background-color: #111;
+      color: #bbb;
       padding: 1rem;
-      background: #222;
-      font-size: 0.85rem;
-    }
-    .ad-banner {
-      background: #444;
-      padding: 0.5rem;
-      text-align: center;
-      margin: 1rem;
-      border-radius: 6px;
-    }
-    .ad-banner a {
-      color: #00f7ff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .feedback {
-      margin: 2rem;
-      background: #222;
-      padding: 1rem;
-      border-radius: 8px;
-    }
-    .feedback textarea {
-      width: 100%;
-      height: 80px;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: none;
-      resize: none;
-    }
-    .feedback button {
-      margin-top: 0.5rem;
-      background: teal;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
+  <button id="language-toggle">AR</button>
+  <header id="header-title">پیش‌بینی آب‌وهوا</header>
+  <div id="search">
+    <input type="text" id="searchInput" placeholder="نام شهر یا روستا را وارد کنید..." />
+  </div>
 
-<header>
-  <h2 id="title">پیش‌بینی آب‌وهوا</h2>
-  <input type="text" id="searchBox" placeholder="نام شهر یا روستا...">
-  <div class="lang-toggle" onclick="toggleLang()">🌐</div>
-  <div class="settings" onclick="alert('تنظیمات هنوز فعال نشده')">⚙️</div>
-</header>
+  <div class="advert">
+    تماس با ما: <a href="tel:09332356547">09332356547</a><br>
+    اینستاگرام: <a href="https://instagram.com/mehdi.eidani" target="_blank">@mehdi.eidani</a><br>
+    ایمیل: <a href="mailto:mehdi1eidani@gmail.com">mehdi1eidani@gmail.com</a>
+  </div>
 
-<div class="ad-banner">
-  <a href="tel:09332356547">📞 تماس با 09332356547</a>
-</div>
+  <div id="forecast" class="forecast">
+    <!-- پیش‌بینی روزانه به‌صورت داینامیک بارگذاری خواهد شد -->
+  </div>
 
-<main id="forecast"></main>
+  <div class="feedback">
+    <h3>نظرات و پیشنهادات</h3>
+    <textarea rows="3" style="width:100%;"></textarea>
+    <br/>
+    <button class="favorite-btn">ارسال</button>
+  </div>
 
-<div class="feedback">
-  <h4>ارسال نظر یا پیشنهاد:</h4>
-  <textarea placeholder="نظر شما..."></textarea>
-  <button onclick="alert('ارسال شد')">ارسال</button>
-</div>
+  <footer>تمام حقوق متعلق به Mehdi Eidani است</footer>
 
-<footer>
-  <p>© کلیه حقوق محفوظ است Mehdi Eidani</p>
-  <p>📧 mehdi1eidani@gmail.com | 📷 <a href="https://instagram.com/mehdi.eidani" target="_blank">@mehdi.eidani</a></p>
-</footer>
+  <script>
+    const apiKey = "dc9c93f51cdd375d459483c2a9f86d88"; // کلید کاربر
+    const forecastDiv = document.getElementById("forecast");
+    const searchInput = document.getElementById("searchInput");
+    const langToggle = document.getElementById("language-toggle");
+    const headerTitle = document.getElementById("header-title");
 
-<script>
-const langData = {
-  fa: {
-    title: "پیش‌بینی آب‌وهوا",
-    placeholder: "نام شهر یا روستا...",
-    send: "ارسال",
-    feedback: "ارسال نظر یا پیشنهاد:",
-    call: "📞 تماس با",
-    rights: "© کلیه حقوق محفوظ است Mehdi Eidani"
-  },
-  ar: {
-    title: "توقعات الطقس",
-    placeholder: "اكتب اسم المدينة...",
-    send: "إرسال",
-    feedback: "اقتراح أو ملاحظة:",
-    call: "📞 اتصل بـ",
-    rights: "© جميع الحقوق محفوظة لـ Mehdi Eidani"
-  }
-};
+    let lang = "fa";
 
-let currentLang = "fa";
-const apiKey = "dc9c93f51cdd375d459483c2a9f86d88";
-
-function toggleLang() {
-  currentLang = currentLang === "fa" ? "ar" : "fa";
-  document.documentElement.lang = currentLang;
-  document.documentElement.dir = currentLang === "fa" ? "rtl" : "rtl"; // Both RTL
-  document.getElementById("title").innerText = langData[currentLang].title;
-  document.getElementById("searchBox").placeholder = langData[currentLang].placeholder;
-  document.querySelector(".feedback h4").innerText = langData[currentLang].feedback;
-  document.querySelector(".feedback button").innerText = langData[currentLang].send;
-  document.querySelector(".ad-banner a").innerText = `${langData[currentLang].call} 09332356547`;
-  document.querySelector("footer p").innerText = langData[currentLang].rights;
-}
-
-document.getElementById("searchBox").addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    const city = e.target.value.trim();
-    if (city.length > 1) {
-      loadWeather(city);
-    } else {
-      alert("لطفاً نام معتبر وارد کنید");
+    function windDirection(deg) {
+      const dirs = ["شمال", "شمال‌شرق", "شرق", "جنوب‌شرق", "جنوب", "جنوب‌غرب", "غرب", "شمال‌غرب"];
+      return dirs[Math.round(deg / 45) % 8];
     }
-  }
-});
 
-function loadWeather(city) {
-  fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=${currentLang}`)
-    .then(res => res.json())
-    .then(data => {
-      if (!data.list) {
-        alert("داده‌ای یافت نشد");
-        return;
+    async function getWeather(city) {
+      try {
+        forecastDiv.innerHTML = "در حال دریافت اطلاعات...";
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=${lang}`);
+        const data = await res.json();
+        if (!data.list) throw new Error("یافت نشد");
+        forecastDiv.innerHTML = "";
+
+        const grouped = {};
+        data.list.forEach(item => {
+          const day = item.dt_txt.split(" ")[0];
+          if (!grouped[day]) grouped[day] = [];
+          grouped[day].push(item);
+        });
+
+        Object.keys(grouped).forEach((day, i) => {
+          const box = document.createElement("div");
+          box.className = "day";
+          box.innerHTML = `<strong>روز ${i + 1}: ${day}</strong>
+            <div>دمای میانگین: ${grouped[day][0].main.temp}°C</div>
+            <div>وضعیت: ${grouped[day][0].weather[0].description}</div>
+            <div>باد: ${grouped[day][0].wind.speed} km/h - ${windDirection(grouped[day][0].wind.deg)}</div>
+            <button class="favorite-btn">پیش‌بینی ساعتی ▼</button>
+            <div class="hourly">
+              ${grouped[day].map(item => `
+                <div style="margin:10px 0;border-bottom:1px solid #555;">
+                  ساعت: ${item.dt_txt.split(" ")[1].slice(0,5)}<br/>
+                  دما: ${item.main.temp}°C<br/>
+                  بیشینه: ${item.main.temp_max} / کمینه: ${item.main.temp_min}<br/>
+                  رطوبت: ${item.main.humidity}%<br/>
+                  فشار: ${item.main.pressure} hPa<br/>
+                  باد: ${item.wind.speed} km/h - ${windDirection(item.wind.deg)}<br/>
+                  وضعیت: ${item.weather[0].description}
+                </div>`).join('')}
+            </div>
+          `;
+          forecastDiv.appendChild(box);
+        });
+
+        document.querySelectorAll(".favorite-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const next = btn.nextElementSibling;
+            next.style.display = next.style.display === "none" ? "block" : "none";
+          });
+        });
+
+      } catch (err) {
+        forecastDiv.innerHTML = "❗ خطا در دریافت اطلاعات، لطفاً دوباره تلاش کنید";
       }
-      displayForecast(data);
-    })
-    .catch(err => {
-      console.error(err);
-      alert("خطا در دریافت اطلاعات");
-    });
-}
+    }
 
-function displayForecast(data) {
-  const forecastEl = document.getElementById("forecast");
-  forecastEl.innerHTML = "";
-
-  const grouped = {};
-
-  data.list.forEach(item => {
-    const date = item.dt_txt.split(" ")[0];
-    if (!grouped[date]) grouped[date] = [];
-    grouped[date].push(item);
-  });
-
-  Object.keys(grouped).forEach(date => {
-    const daily = grouped[date];
-    const dayEl = document.createElement("div");
-    dayEl.className = "forecast-day";
-    const iconUrl = `https://openweathermap.org/img/wn/${daily[0].weather[0].icon}@2x.png`;
-
-    const dir = getWindDirection(daily[0].wind.deg);
-
-    dayEl.innerHTML = `
-      <strong>${toPersianDate(date)}</strong><br>
-      <img src="${iconUrl}" class="icon"> ${daily[0].weather[0].description}<br>
-      🌡️ دما: ${daily[0].main.temp_min}° ~ ${daily[0].main.temp_max}°<br>
-      💧 رطوبت: ${daily[0].main.humidity}%<br>
-      🧭 باد: ${daily[0].wind.speed}km/h ${dir}
-      <div class="forecast-hourly"></div>
-    `;
-    dayEl.addEventListener("click", () => {
-      const sub = dayEl.querySelector(".forecast-hourly");
-      sub.style.display = sub.style.display === "block" ? "none" : "block";
-      sub.innerHTML = daily.map(i => `
-        ${i.dt_txt.split(" ")[1].slice(0,5)}: ${i.main.temp}°C, ${i.weather[0].description}
-      `).join("<br>");
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const val = searchInput.value.trim();
+        if (val) getWeather(val);
+      }
     });
 
-    forecastEl.appendChild(dayEl);
-  });
-}
+    langToggle.addEventListener("click", () => {
+      lang = lang === "fa" ? "ar" : "fa";
+      langToggle.textContent = lang === "fa" ? "AR" : "FA";
+      headerTitle.textContent = lang === "fa" ? "پیش‌بینی آب‌وهوا" : "توقعات الطقس";
+    });
 
-function getWindDirection(deg) {
-  const dirs = ["شمال", "شمال شرق", "شرق", "جنوب شرق", "جنوب", "جنوب غرب", "غرب", "شمال غرب"];
-  return dirs[Math.round(deg / 45) % 8];
-}
-
-function toPersianDate(dateStr) {
-  const g = new Date(dateStr);
-  const f = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  return f.format(g);
-}
-
-// موقعیت مکانی کاربر
-if ("geolocation" in navigator) {
-  navigator.geolocation.getCurrentPosition(pos => {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=${currentLang}`)
-      .then(res => res.json())
-      .then(data => displayForecast(data));
-  });
-}
-</script>
-
+    getWeather("اهواز");
+  </script>
 </body>
 </html>
