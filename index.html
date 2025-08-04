@@ -212,6 +212,9 @@ const translations = {
     alertCommentSaved: "نظر شما ثبت شد.",
     errorFetch: "❗ خطا در دریافت اطلاعات، دوباره تلاش کنید.",
     wind: "باد",
+    windSpeed: "سرعت باد",
+    windDirection: "جهت باد",
+    precipitation: "نسبت بارندگی",
     tempMax: "دمای بیشینه (روز)",
     tempMin: "دمای کمینه (شب)",
     favoriteAdded: "به علاقه‌مندی‌ها اضافه شد.",
@@ -236,6 +239,9 @@ const translations = {
     alertCommentSaved: "تم حفظ تعليقك.",
     errorFetch: "❗ خطأ في تحميل البيانات، حاول مرة أخرى.",
     wind: "الرياح",
+    windSpeed: "سرعة الرياح",
+    windDirection: "اتجاه الرياح",
+    precipitation: "نسبة الهطول",
     tempMax: "درجة الحرارة العظمى (نهارًا)",
     tempMin: "درجة الحرارة الصغرى (ليلًا)",
     favoriteAdded: "أُضيف إلى المفضلة.",
@@ -267,6 +273,7 @@ function toggleLanguage() {
   commentsTitle.textContent = translations[lang].commentsTitle;
   commentInput.placeholder = translations[lang].commentPlaceholder;
   submitCommentBtn.textContent = translations[lang].sendBtn;
+  // اگر شهری هست جستجو کن
   if (searchInput.value.trim() !== "") {
     fetchWeather(searchInput.value.trim());
   }
@@ -366,12 +373,6 @@ function displayForecast(list) {
     const dayIcon = dayTemps.length ? dayTemps[0].weather[0].icon : "01d";
     const dayDesc = dayTemps.length ? dayTemps[0].weather[0].description : "";
 
-    // داده‌های روز: رطوبت، بارندگی، باد
-    const dayHumidity = dayTemps.length ? dayTemps[0].main.humidity : "-";
-    const dayRain = dayTemps.length && dayTemps[0].rain ? dayTemps[0].rain["3h"] || 0 : 0;
-    const dayWindSpeed = dayTemps.length ? dayTemps[0].wind.speed : "-";
-    const dayWindDir = dayTemps.length ? windDirection(dayTemps[0].wind.deg) : "-";
-
     // کمینه دما در شب (18:00 تا 06:00 روز بعد)
     const nightTemps = dayItems.filter(i => {
       const hour = +i.dt_txt.split(" ")[1].slice(0,2);
@@ -381,11 +382,14 @@ function displayForecast(list) {
     const nightIcon = nightTemps.length ? nightTemps[0].weather[0].icon : "01n";
     const nightDesc = nightTemps.length ? nightTemps[0].weather[0].description : "";
 
-    // داده‌های شب: رطوبت، بارندگی، باد
-    const nightHumidity = nightTemps.length ? nightTemps[0].main.humidity : "-";
-    const nightRain = nightTemps.length && nightTemps[0].rain ? nightTemps[0].rain["3h"] || 0 : 0;
-    const nightWindSpeed = nightTemps.length ? nightTemps[0].wind.speed : "-";
-    const nightWindDir = nightTemps.length ? windDirection(nightTemps[0].wind.deg) : "-";
+    // مقدار رطوبت، فشار، بارندگی، باد از اولین نمونه روز
+    const firstItem = dayItems[0];
+    const humidity = firstItem.main.humidity;
+    const pressure = firstItem.main.pressure;
+    const rain = firstItem.rain ? firstItem.rain["3h"] || 0 : 0;
+    const windSpeed = firstItem.wind.speed;
+    const windDeg = firstItem.wind.deg;
+    const windDir = windDirection(windDeg);
 
     const dayDiv = document.createElement("div");
     dayDiv.className = "day";
@@ -398,9 +402,6 @@ function displayForecast(list) {
           <img src="https://openweathermap.org/img/wn/${dayIcon}@2x.png" alt="${dayDesc}" />
           <div>${maxDayTemp !== null ? maxDayTemp.toFixed(1) + "°C" : "-"}</div>
           <div>${translations[lang].status}: ${dayDesc}</div>
-          <div>${translations[lang].humidity}: ${dayHumidity}%</div>
-          <div>بارندگی: ${dayRain} mm</div>
-          <div>${translations[lang].wind}: ${dayWindSpeed} km/h - ${dayWindDir}</div>
         </div>
       </div>
       <div class="day-section" title="${nightDesc}">
@@ -409,10 +410,14 @@ function displayForecast(list) {
           <img src="https://openweathermap.org/img/wn/${nightIcon}@2x.png" alt="${nightDesc}" />
           <div>${minNightTemp !== null ? minNightTemp.toFixed(1) + "°C" : "-"}</div>
           <div>${translations[lang].status}: ${nightDesc}</div>
-          <div>${translations[lang].humidity}: ${nightHumidity}%</div>
-          <div>بارندگی: ${nightRain} mm</div>
-          <div>${translations[lang].wind}: ${nightWindSpeed} km/h - ${nightWindDir}</div>
         </div>
+      </div>
+      <div class="day-section" style="background:#005f73;">
+        <div>${translations[lang].humidity}: ${humidity}%</div>
+        <div>${translations[lang].pressure}: ${pressure} hPa</div>
+        <div>${translations[lang].precipitation}: ${rain} mm</div>
+        <div>${translations[lang].windSpeed}: ${windSpeed} m/s</div>
+        <div>${translations[lang].windDirection}: ${windDir}</div>
       </div>
     `;
 
@@ -470,7 +475,7 @@ submitCommentBtn.addEventListener("click", () => {
     alert(translations[lang].alertEmptyComment);
     return;
   }
-  let comments = JSON.parse(localStorage.getItem("comments") || "[]");
+  const comments = JSON.parse(localStorage.getItem("comments") || "[]");
   comments.push(comment);
   localStorage.setItem("comments", JSON.stringify(comments));
   commentInput.value = "";
@@ -478,17 +483,10 @@ submitCommentBtn.addEventListener("click", () => {
   alert(translations[lang].alertCommentSaved);
 });
 
-// بارگذاری اولیه
 loadComments();
-renderFavoriteStar();
-headerTitle.textContent = translations[lang].header;
-searchInput.placeholder = translations[lang].placeholder;
-getLocationBtn.textContent = translations[lang].locationBtn;
-commentsTitle.textContent = translations[lang].commentsTitle;
-commentInput.placeholder = translations[lang].commentPlaceholder;
-submitCommentBtn.textContent = translations[lang].sendBtn;
-langToggle.textContent = "AR";
-</script>
 
+// بارگذاری اولیه شهر پیش فرض
+fetchWeather("اهواز");
+</script>
 </body>
 </html>
