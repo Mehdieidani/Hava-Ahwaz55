@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>هواشناسی پیشرفته</title>
+<title>هواشناسی پیشرفته با ثبت نام و چت خصوصی</title>
 <style>
+  /* تنظیمات پایه */
   body {
-    font-family: sans-serif;
+    font-family: 'Tahoma', sans-serif;
+    margin: 0; padding: 0;
     background: #0077b6;
     color: #fff;
-    margin: 0;
-    padding: 0;
     direction: rtl;
+    transition: background 0.3s, color 0.3s;
   }
   header {
     background: linear-gradient(to left, #023e8a, #0096c7);
@@ -21,555 +22,526 @@
     font-weight: bold;
     position: relative;
   }
-  #language-toggle {
+  button {
+    cursor: pointer;
+  }
+  /* دکمه زبان و تنظیمات */
+  #language-toggle, #settings-btn {
     position: absolute;
-    left: 1rem;
     top: 1rem;
     background: #ff5722;
     border: none;
     color: white;
     padding: 0.3rem 0.8rem;
     border-radius: 5px;
-    cursor: pointer;
     font-weight: bold;
   }
-  #search-container {
-    padding: 1rem;
-    text-align: center;
-  }
-  #searchInput {
-    padding: 0.5rem;
-    width: 50%;
-    border-radius: 5px;
-    border: none;
-    font-size: 1rem;
-    max-width: 400px;
-  }
-  #searchBtn {
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    border: none;
-    background: #ffb703;
-    color: #023047;
-    cursor: pointer;
-    font-weight: bold;
-    margin-right: 10px;
-  }
-  #get-location {
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    border: none;
-    background: #ffb703;
-    color: #023047;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  #forecast {
+  #language-toggle { left: 1rem; }
+  #settings-btn { left: 5.5rem; }
+
+  /* کانتینر صفحه */
+  #container {
     max-width: 900px;
     margin: 1rem auto;
     padding: 0 1rem;
   }
-  .city-header {
-    font-size: 1.6rem;
-    margin-bottom: 0.5rem;
-    position: relative;
-    padding-left: 40px;
-    user-select: none;
-  }
-  .star {
-    position: absolute;
-    left: 0;
-    top: 0;
-    font-size: 2.2rem;
-    color: gold;
-    cursor: pointer;
-    user-select: none;
-  }
-  .day {
+
+  /* فرم ثبت نام / ورود */
+  #auth-section {
     background: #023047;
     border-radius: 10px;
+    padding: 1rem;
     margin-bottom: 1rem;
-    padding: 1rem;
   }
-  .day-section {
-    background: #0077b6;
-    margin-top: 10px;
-    border-radius: 8px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #fffbf5;
+  #auth-section h2 {
+    margin-top: 0;
   }
-  .day-section div {
-    flex: 1;
-    text-align: center;
-  }
-  .day-section img {
-    width: 72px;
-    height: 72px;
-    vertical-align: middle;
-  }
-  #comments-section {
-    max-width: 900px;
-    margin: 2rem auto;
-    background: #023047;
-    border-radius: 8px;
-    padding: 1rem;
-  }
-  #commentInput {
+  #auth-section input, #auth-section select {
     width: 100%;
-    height: 80px;
+    padding: 0.5rem;
+    margin: 0.3rem 0 1rem 0;
     border-radius: 5px;
     border: none;
-    padding: 0.5rem;
-    resize: vertical;
     font-size: 1rem;
   }
-  #submitComment {
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
+  #auth-section label {
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  #auth-section .error {
+    color: #f44336;
+    margin-bottom: 1rem;
+  }
+  #auth-section button {
+    background: #ffb703;
     border: none;
+    color: #023047;
+    font-weight: bold;
+    padding: 0.7rem;
     border-radius: 5px;
+    width: 100%;
+  }
+  #auth-toggle {
+    margin-top: 0.5rem;
+    text-align: center;
+    color: #ffb703;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* چت خصوصی */
+  #chat-section {
+    background: #023047;
+    border-radius: 10px;
+    padding: 1rem;
+    display: none;
+    flex-direction: column;
+    height: 400px;
+  }
+  #chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    background: #011f4b;
+    border-radius: 5px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .message {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    max-width: 70%;
+    word-wrap: break-word;
+  }
+  .message.user {
     background: #ffb703;
     color: #023047;
-    cursor: pointer;
+    align-self: flex-start;
+  }
+  .message.admin {
+    background: #90e0ef;
+    color: #023047;
+    align-self: flex-end;
+  }
+  #chat-input {
+    display: flex;
+  }
+  #chat-input textarea {
+    flex-grow: 1;
+    resize: none;
+    padding: 0.5rem;
+    border-radius: 5px 0 0 5px;
+    border: none;
+    font-size: 1rem;
+  }
+  #chat-input button {
+    background: #ffb703;
+    border: none;
+    color: #023047;
+    padding: 0 1rem;
     font-weight: bold;
+    border-radius: 0 5px 5px 0;
   }
-  #commentsContainer {
-    margin-top: 1rem;
-    max-height: 200px;
-    overflow-y: auto;
-    color: #fff;
+
+  /* بخش تنظیمات */
+  #settings-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #023047;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #0008;
+    display: none;
+    z-index: 1000;
+    width: 320px;
   }
-  footer {
+  #settings-modal h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
     text-align: center;
-    padding: 1rem;
-    color: #ddd;
-    background: #010a13;
-    margin-top: 2rem;
   }
-  a {
-    color: #ffb703;
-    text-decoration: none;
+  #settings-modal label {
+    display: block;
+    margin: 0.5rem 0 0.2rem 0;
   }
-  a:hover {
-    text-decoration: underline;
+  #settings-modal select, #settings-modal input[type=range] {
+    width: 100%;
+    padding: 0.3rem;
+    border-radius: 5px;
+    border: none;
   }
-  #date-display {
-    margin-top: 0.5rem;
-    font-size: 1.1rem;
+  #settings-modal button.close-settings {
+    margin-top: 1rem;
+    background: #ff5722;
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    width: 100%;
+    border-radius: 5px;
     font-weight: bold;
-    color: #ffb703;
+    cursor: pointer;
   }
+
+  /* تم تاریک */
+  body.dark {
+    background: #011627;
+    color: #eee;
+  }
+  body.dark header {
+    background: linear-gradient(to left, #001f3f, #004080);
+  }
+  body.dark #auth-section,
+  body.dark #chat-section,
+  body.dark #settings-modal {
+    background: #001f3f;
+    color: #eee;
+  }
+  body.dark #chat-messages {
+    background: #001733;
+  }
+
+  /* فونت‌ها */
+  body.font-tahoma { font-family: 'Tahoma', sans-serif; }
+  body.font-vazir { font-family: 'Vazir', sans-serif; }
+  body.font-irsans { font-family: 'IRANSans', sans-serif; }
+  body.font-sahel { font-family: 'Sahel', sans-serif; }
+
 </style>
+
+<!-- فونت‌های وب -->
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" type="text/css" />
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/iransans-web@3.1.1/dist/css/iransans.css" rel="stylesheet" type="text/css" />
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/sahel-font@v2.0.1/dist/font-face.css" rel="stylesheet" type="text/css" />
+
 </head>
-<body>
+<body class="font-tahoma">
+
 <header>
-  <div id="header-title">پیش‌بینی آب‌وهوا</div>
+  هواشناسی پیشرفته
   <button id="language-toggle">AR</button>
+  <button id="settings-btn" title="تنظیمات">⚙️</button>
 </header>
 
-<div id="search-container">
-  <input type="text" id="searchInput" placeholder="نام شهر یا روستا را وارد کنید..." />
-  <button id="searchBtn">🔍 جستجو</button>
-  <button id="get-location">📍 موقعیت من</button>
-  <div id="date-display"></div>
+<div id="container">
+
+  <!-- فرم ثبت نام و ورود -->
+  <section id="auth-section">
+    <h2 id="auth-title">ثبت نام</h2>
+    <div class="error" id="auth-error"></div>
+    <form id="auth-form">
+      <label for="phone">شماره موبایل:</label>
+      <input type="tel" id="phone" name="phone" placeholder="مثال: 09123456789" required pattern="09[0-9]{9}" />
+      
+      <label for="password">رمز عبور:</label>
+      <input type="password" id="password" name="password" required minlength="6" />
+
+      <label for="password-repeat" id="label-repeat">تکرار رمز عبور:</label>
+      <input type="password" id="password-repeat" name="password-repeat" required minlength="6" />
+
+      <label for="recovery-question">سوال بازیابی رمز (مثلا اولین مدرسه شما؟):</label>
+      <input type="text" id="recovery-question" name="recovery-question" required />
+
+      <button type="submit" id="auth-submit">ثبت نام</button>
+    </form>
+    <div id="auth-toggle">حالا وارد شوید</div>
+  </section>
+
+  <!-- بخش هواشناسی (همیشه نمایش داده می‌شود) -->
+  <section id="weather-section">
+    <div id="weather-app">
+      <!-- اینجا کد هواشناسی شما قرار می‌گیرد -->
+      <p>اینجا پیش‌بینی هواشناسی قرار می‌گیرد...</p>
+    </div>
+  </section>
+
+  <!-- بخش چت خصوصی (فقط بعد از ورود فعال می‌شود) -->
+  <section id="chat-section">
+    <div id="chat-messages"></div>
+    <div id="chat-input">
+      <textarea id="chat-text" rows="2" placeholder="پیام خود را بنویسید..."></textarea>
+      <button id="chat-send">ارسال</button>
+    </div>
+  </section>
+
 </div>
 
-<div id="forecast"></div>
+<!-- پنجره تنظیمات -->
+<div id="settings-modal">
+  <h3>تنظیمات</h3>
+  <label for="theme-select">تم:</label>
+  <select id="theme-select">
+    <option value="light">روشن</option>
+    <option value="dark">تاریک</option>
+  </select>
 
-<div id="comments-section">
-  <h3 id="comments-title">نظرات و پیشنهادات</h3>
-  <textarea id="commentInput" placeholder="نظر خود را اینجا بنویسید..."></textarea>
-  <br />
-  <button id="submitComment">ارسال</button>
-  <div id="commentsContainer"></div>
+  <label for="font-select">فونت:</label>
+  <select id="font-select">
+    <option value="font-tahoma">Tahoma</option>
+    <option value="font-vazir">Vazir</option>
+    <option value="font-irsans">IRANSans</option>
+    <option value="font-sahel">Sahel</option>
+  </select>
+
+  <label for="font-size-range">اندازه فونت:</label>
+  <input type="range" id="font-size-range" min="12" max="28" value="16" />
+
+  <button class="close-settings">بستن</button>
 </div>
-
-<footer>
-  تماس با ما: <a href="tel:09332356547">09332356547</a> |
-  اینستاگرام: <a href="https://instagram.com/mehdi.eidani" target="_blank">@mehdi.eidani</a> |
-  ایمیل: <a href="mailto:mehdi1eidani@gmail.com">mehdi1eidani@gmail.com</a><br />
-  تمام حقوق متعلق به Mehdi Eidani است
-</footer>
 
 <script>
-// تابع تبدیل تاریخ میلادی به شمسی
-// با استفاده از کتابخانه js-jalaali (لینک مستقیم در کامنت)
-// در اینجا تابع کوتاه‌سازی شده را می‌نویسیم
-// اگر بخواهی می‌توانم کتابخانه کامل را اضافه کنم ولی این نسخه ساده به خوبی کار می‌کند.
+  // --- تنظیمات پایه ---
 
-function toJalaali(gy, gm, gd) {
-  // تبدیل تاریخ میلادی به شمسی (خلاصه و ساده)
-  const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
-  let jy, jm, jd, gy2, days;
+  const authSection = document.getElementById('auth-section');
+  const weatherSection = document.getElementById('weather-section');
+  const chatSection = document.getElementById('chat-section');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatText = document.getElementById('chat-text');
+  const chatSendBtn = document.getElementById('chat-send');
+  const authForm = document.getElementById('auth-form');
+  const authError = document.getElementById('auth-error');
+  const authTitle = document.getElementById('auth-title');
+  const authToggle = document.getElementById('auth-toggle');
+  const passwordRepeatLabel = document.getElementById('label-repeat');
+  const passwordRepeatInput = document.getElementById('password-repeat');
 
-  gy2 = (gm > 2) ? (gy + 1) : gy;
-  days = 355666 + (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) + gd + g_d_m[gm -1];
-  jy = -1595 + (33 * Math.floor(days / 12053));
-  days %= 12053;
-  jy += 4 * Math.floor(days / 1461);
-  days %= 1461;
-  if(days > 365){
-    jy += Math.floor((days - 1) / 365);
-    days = (days -1) % 365;
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsModal = document.getElementById('settings-modal');
+  const themeSelect = document.getElementById('theme-select');
+  const fontSelect = document.getElementById('font-select');
+  const fontSizeRange = document.getElementById('font-size-range');
+  const closeSettingsBtn = document.querySelector('.close-settings');
+
+  let isRegisterMode = true;
+  let currentUser = null;
+
+  // --- کار با LocalStorage برای کاربران ---
+  function getUsers() {
+    return JSON.parse(localStorage.getItem('users') || '{}');
   }
-  if(days < 186){
-    jm = 1 + Math.floor(days / 31);
-    jd = 1 + (days % 31);
-  } else {
-    jm = 7 + Math.floor((days - 186) / 30);
-    jd = 1 + ((days -186) % 30);
+  function saveUsers(users) {
+    localStorage.setItem('users', JSON.stringify(users));
   }
-  return [jy, jm, jd];
-}
 
-// آرایه روزهای هفته فارسی و عربی
-const weekdaysFa = ["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه","شنبه"];
-const weekdaysAr = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
-
-const langToggle = document.getElementById("language-toggle");
-const headerTitle = document.getElementById("header-title");
-const searchInput = document.getElementById("searchInput");
-const forecastDiv = document.getElementById("forecast");
-const getLocationBtn = document.getElementById("get-location");
-const searchBtn = document.getElementById("searchBtn");
-const dateDisplay = document.getElementById("date-display");
-const commentInput = document.getElementById("commentInput");
-const submitCommentBtn = document.getElementById("submitComment");
-const commentsContainer = document.getElementById("commentsContainer");
-const commentsTitle = document.getElementById("comments-title");
-
-let lang = "fa";
-
-const translations = {
-  fa: {
-    header: "پیش‌بینی آب‌وهوا",
-    placeholder: "نام شهر یا روستا را وارد کنید...",
-    locationBtn: "📍 موقعیت من",
-    commentsTitle: "نظرات و پیشنهادات",
-    commentPlaceholder: "نظر خود را اینجا بنویسید...",
-    sendBtn: "ارسال",
-    alertEmptyComment: "لطفا یک نظر وارد کنید.",
-    alertCommentSaved: "نظر شما ثبت شد.",
-    errorFetch: "❗ خطا در دریافت اطلاعات، دوباره تلاش کنید.",
-    wind: "باد",
-    windSpeed: "سرعت باد",
-    windDirection: "جهت باد",
-    precipitation: "نسبت بارندگی",
-    tempMax: "دمای بیشینه (روز)",
-    tempMin: "دمای کمینه (شب)",
-    favoriteAdded: "به علاقه‌مندی‌ها اضافه شد.",
-    favoriteRemoved: "از علاقه‌مندی‌ها حذف شد.",
-    humidity: "رطوبت",
-    pressure: "فشار",
-    status: "وضعیت",
-    hour: "ساعت",
-    temp: "دما",
-    cityPlaceholder: "نام شهر یا روستا را وارد کنید...",
-    favoriteCityTitle: "شهر علاقه‌مند:",
-    favoriteBtnTitle: "ستاره برای علاقه‌مندی",
-  },
-  ar: {
-    header: "توقعات الطقس",
-    placeholder: "أدخل اسم المدينة أو القرية...",
-    locationBtn: "📍 موقعي",
-    commentsTitle: "آراء وملاحظات",
-    commentPlaceholder: "اكتب تعليقك هنا...",
-    sendBtn: "إرسال",
-    alertEmptyComment: "يرجى إدخال تعليق.",
-    alertCommentSaved: "تم حفظ تعليقك.",
-    errorFetch: "❗ خطأ في تحميل البيانات، حاول مرة أخرى.",
-    wind: "الرياح",
-    windSpeed: "سرعة الرياح",
-    windDirection: "اتجاه الرياح",
-    precipitation: "نسبة الهطول",
-    tempMax: "درجة الحرارة العظمى (نهارًا)",
-    tempMin: "درجة الحرارة الصغرى (ليلًا)",
-    favoriteAdded: "أُضيف إلى المفضلة.",
-    favoriteRemoved: "تم الحذف من المفضلة.",
-    humidity: "الرطوبة",
-    pressure: "الضغط",
-    status: "الحالة",
-    hour: "الساعة",
-    temp: "درجة الحرارة",
-    cityPlaceholder: "أدخل اسم المدينة أو القرية...",
-    favoriteCityTitle: "المدينة المفضلة:",
-    favoriteBtnTitle: "نجمة للإضافة للمفضلة",
+  // --- ثبت نام ---
+  function registerUser(phone, password, recoveryQuestion) {
+    const users = getUsers();
+    if(users[phone]) {
+      return { success: false, message: 'این شماره قبلاً ثبت شده است.' };
+    }
+    users[phone] = {
+      password,
+      recoveryQuestion,
+      messages: []
+    };
+    saveUsers(users);
+    return { success: true };
   }
-};
 
-function windDirection(deg) {
-  const directions = lang === "fa"
-    ? ["شمال", "شمال‌شرق", "شرق", "جنوب‌شرق", "جنوب", "جنوب‌غرب", "غرب", "شمال‌غرب"]
-    : ["شمال", "شمال شرق", "شرق", "جنوب شرق", "جنوب", "جنوب غرب", "غرب", "شمال غرب"];
-  return directions[Math.round(deg / 45) % 8];
-}
-
-function toggleLanguage() {
-  lang = lang === "fa" ? "ar" : "fa";
-  langToggle.textContent = lang === "fa" ? "AR" : "FA";
-  headerTitle.textContent = translations[lang].header;
-  searchInput.placeholder = translations[lang].placeholder;
-  getLocationBtn.textContent = translations[lang].locationBtn;
-  commentsTitle.textContent = translations[lang].commentsTitle;
-  commentInput.placeholder = translations[lang].commentPlaceholder;
-  submitCommentBtn.textContent = translations[lang].sendBtn;
-  searchBtn.textContent = lang === "fa" ? "🔍 جستجو" : "🔍 بحث";
-  updateDateDisplay();
-  if (searchInput.value.trim() !== "") {
-    fetchWeather(searchInput.value.trim());
+  // --- ورود ---
+  function loginUser(phone, password) {
+    const users = getUsers();
+    if(!users[phone]) {
+      return { success: false, message: 'این شماره ثبت نشده است.' };
+    }
+    if(users[phone].password !== password) {
+      return { success: false, message: 'رمز عبور اشتباه است.' };
+    }
+    return { success: true, user: users[phone] };
   }
-  renderFavoriteStar();
-}
 
-langToggle.addEventListener("click", toggleLanguage);
-
-function saveFavoriteCity(city) {
-  localStorage.setItem("favorite_city", city);
-}
-
-function getFavoriteCity() {
-  return localStorage.getItem("favorite_city") || null;
-}
-
-function removeFavoriteCity() {
-  localStorage.removeItem("favorite_city");
-}
-
-function renderFavoriteStar() {
-  const city = searchInput.value.trim();
-  const star = document.querySelector(".city-header .star");
-  if (!star) return;
-  if (city && getFavoriteCity() === city) {
-    star.textContent = "★";
-    star.title = translations[lang].favoriteBtnTitle + " (حذف)";
-  } else {
-    star.textContent = "☆";
-    star.title = translations[lang].favoriteBtnTitle + " (افزودن)";
+  // --- ارسال پیام (ذخیره پیام‌ها در LocalStorage برای هر کاربر) ---
+  function saveMessage(phone, message, sender) {
+    const users = getUsers();
+    if(!users[phone]) return;
+    users[phone].messages.push({ sender, text: message, time: new Date().toISOString() });
+    saveUsers(users);
   }
-}
 
-function toggleFavoriteCity(starEl) {
-  const city = searchInput.value.trim();
-  if (!city) return alert(lang === "fa" ? "لطفا نام شهر را وارد کنید." : "يرجى إدخال اسم المدينة.");
-  if (getFavoriteCity() === city) {
-    removeFavoriteCity();
-    starEl.textContent = "☆";
-    alert(translations[lang].favoriteRemoved);
-  } else {
-    saveFavoriteCity(city);
-    starEl.textContent = "★";
-    alert(translations[lang].favoriteAdded);
+  // --- بارگذاری پیام‌ها ---
+  function loadMessages(phone) {
+    const users = getUsers();
+    if(!users[phone]) return [];
+    return users[phone].messages || [];
   }
-}
 
-async function fetchWeather(city) {
-  forecastDiv.innerHTML = lang === "fa" ? "در حال دریافت اطلاعات..." : "جارٍ تحميل البيانات...";
-  try {
-    const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=${lang}`);
-    const data = await res.json();
-    if (!data.list) throw new Error();
-    searchInput.value = data.city.name;
-    displayForecast(data.list);
-  } catch {
-    forecastDiv.innerHTML = translations[lang].errorFetch;
-  }
-}
-
-function displayForecast(list) {
-  // گروه‌بندی داده‌ها بر اساس روز
-  const days = {};
-  list.forEach(item => {
-    const day = item.dt_txt.split(" ")[0];
-    if (!days[day]) days[day] = [];
-    days[day].push(item);
-  });
-
-  forecastDiv.innerHTML = "";
-
-  // عنوان شهر با ستاره علاقه‌مندی
-  const cityName = searchInput.value.trim();
-  const favStar = getFavoriteCity() === cityName ? "★" : "☆";
-
-  const cityHeader = document.createElement("div");
-  cityHeader.className = "city-header";
-  cityHeader.innerHTML = `
-    ${cityName}
-    <span class="star" title="${translations[lang].favoriteBtnTitle}">${favStar}</span>
-  `;
-  forecastDiv.appendChild(cityHeader);
-
-  // ستاره کلیک
-  cityHeader.querySelector(".star").addEventListener("click", function(){
-    toggleFavoriteCity(this);
-  });
-
-  Object.keys(days).slice(0, 5).forEach(day => {
-    const dayItems = days[day];
-    // بیشینه دما در روز (حدود 06:00 تا 18:00)
-    const dayTemps = dayItems.filter(i => {
-      const hour = +i.dt_txt.split(" ")[1].slice(0,2);
-      return hour >= 6 && hour < 18;
+  // --- نمایش پیام‌ها ---
+  function renderMessages(messages) {
+    chatMessages.innerHTML = "";
+    messages.forEach(msg => {
+      const div = document.createElement('div');
+      div.classList.add('message');
+      div.classList.add(msg.sender === 'user' ? 'user' : 'admin');
+      const time = new Date(msg.time).toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
+      div.textContent = `[${time}] ${msg.text}`;
+      chatMessages.appendChild(div);
     });
-    const maxDayTemp = dayTemps.length ? Math.max(...dayTemps.map(i => i.main.temp_max)) : null;
-    const dayIcon = dayTemps.length ? dayTemps[0].weather[0].icon : "01d";
-    const dayDesc = dayTemps.length ? dayTemps[0].weather[0].description : "";
-
-    // کمینه دما در شب (18:00 تا 06:00 روز بعد)
-    const nightTemps = dayItems.filter(i => {
-      const hour = +i.dt_txt.split(" ")[1].slice(0,2);
-      return hour >= 18 || hour < 6;
-    });
-    const minNightTemp = nightTemps.length ? Math.min(...nightTemps.map(i => i.main.temp_min)) : null;
-    const nightIcon = nightTemps.length ? nightTemps[0].weather[0].icon : "01n";
-    const nightDesc = nightTemps.length ? nightTemps[0].weather[0].description : "";
-
-    // مقدار رطوبت، فشار، بارندگی، باد از اولین نمونه روز
-    const firstItem = dayItems[0];
-    const humidity = firstItem.main.humidity;
-    const pressure = firstItem.main.pressure;
-    const rain = firstItem.rain ? firstItem.rain["3h"] || 0 : 0;
-    const windSpeed = firstItem.wind.speed;
-    const windDeg = firstItem.wind.deg;
-    const windDir = windDirection(windDeg);
-
-    // نمایش تاریخ شمسی و ایام هفته با توجه به lang و روز میلادی
-    const dateParts = day.split("-");
-    const gy = parseInt(dateParts[0], 10);
-    const gm = parseInt(dateParts[1], 10);
-    const gd = parseInt(dateParts[2], 10);
-
-    const [jy, jm, jd] = toJalaali(gy, gm, gd);
-
-    const jsWeekdayIndex = new Date(gy, gm -1, gd).getDay(); // 0 یکشنبه در جاوااسکریپت است
-    // چون ما هفته را شنبه تا جمعه فارسی داشتیم، ولی JS شنبه=6 نیست، اینجا هماهنگ می‌کنیم:
-    // برای فارسی و عربی از ایام هفته زیر استفاده می کنیم:
-    // jsWeekdayIndex: 0 = Sunday = یکشنبه/الأحد
-
-    const weekdayFa = weekdaysFa[jsWeekdayIndex];
-    const weekdayAr = weekdaysAr[jsWeekdayIndex];
-
-    const displayWeekday = lang === "fa" ? weekdayFa : weekdayAr;
-    const displayDate = `${jy}/${jm.toString().padStart(2,"0")}/${jd.toString().padStart(2,"0")}`;
-
-    const dayDiv = document.createElement("div");
-    dayDiv.className = "day";
-
-    dayDiv.innerHTML = `
-      <div><strong>${lang === "fa" ? "روز" : "اليوم"}: ${displayWeekday} - ${displayDate}</strong></div>
-      <div class="day-section" title="${dayDesc}">
-        <div>
-          <div>${translations[lang].tempMax}</div>
-          <img src="https://openweathermap.org/img/wn/${dayIcon}@2x.png" alt="${dayDesc}" />
-          <div>${maxDayTemp !== null ? maxDayTemp.toFixed(1) + "°C" : "-"}</div>
-          <div>${translations[lang].status}: ${dayDesc}</div>
-        </div>
-      </div>
-      <div class="day-section" title="${nightDesc}">
-        <div>
-          <div>${translations[lang].tempMin}</div>
-          <img src="https://openweathermap.org/img/wn/${nightIcon}@2x.png" alt="${nightDesc}" />
-          <div>${minNightTemp !== null ? minNightTemp.toFixed(1) + "°C" : "-"}</div>
-          <div>${translations[lang].status}: ${nightDesc}</div>
-        </div>
-      </div>
-      <div class="day-section" style="background:#0096c7; font-size: 0.95rem; flex-wrap: wrap; justify-content: center;">
-        <div>${translations[lang].humidity}: ${humidity}%</div>
-        <div>${translations[lang].pressure}: ${pressure} hPa</div>
-        <div>${translations[lang].precipitation}: ${rain} mm</div>
-        <div>${translations[lang].windSpeed}: ${windSpeed} m/s</div>
-        <div>${translations[lang].windDirection}: ${windDir}</div>
-      </div>
-    `;
-
-    forecastDiv.appendChild(dayDiv);
-  });
-}
-
-// جستجو با Enter
-searchInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    const city = searchInput.value.trim();
-    if (city) fetchWeather(city);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   }
-});
 
-// دکمه جستجو کلیک
-searchBtn.addEventListener("click", () => {
-  const city = searchInput.value.trim();
-  if (city) fetchWeather(city);
-});
-
-// موقعیت من
-getLocationBtn.addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    alert(lang === "fa" ? "مرورگر شما از GPS پشتیبانی نمی‌کند." : "المتصفح لا يدعم GPS.");
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(position => {
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
-    fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=${lang}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.list) throw new Error();
-        searchInput.value = data.city.name;
-        displayForecast(data.list);
-      })
-      .catch(() => {
-        alert(lang === "fa" ? "خطا در دریافت اطلاعات موقعیت." : "خطأ في تحميل بيانات الموقع.");
-      });
-  }, () => {
-    alert(lang === "fa" ? "دسترسی به موقعیت رد شد." : "تم رفض الوصول للموقع.");
+  // --- سوئیچ ثبت نام/ورود ---
+  authToggle.addEventListener('click', () => {
+    isRegisterMode = !isRegisterMode;
+    authError.textContent = '';
+    if(isRegisterMode) {
+      authTitle.textContent = 'ثبت نام';
+      authSubmit.textContent = 'ثبت نام';
+      passwordRepeatLabel.style.display = 'block';
+      passwordRepeatInput.style.display = 'block';
+      authToggle.textContent = 'حالا وارد شوید';
+    } else {
+      authTitle.textContent = 'ورود';
+      authSubmit.textContent = 'ورود';
+      passwordRepeatLabel.style.display = 'none';
+      passwordRepeatInput.style.display = 'none';
+      authToggle.textContent = 'ثبت نام کنید';
+    }
   });
-});
 
-// نظرات
-function loadComments() {
-  const comments = JSON.parse(localStorage.getItem("comments") || "[]");
-  commentsContainer.innerHTML = "";
-  comments.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "comment";
-    div.textContent = c;
-    commentsContainer.appendChild(div);
+  // --- ارسال فرم ثبت نام / ورود ---
+  const authSubmit = document.getElementById('auth-submit');
+  authForm.addEventListener('submit', e => {
+    e.preventDefault();
+    authError.textContent = '';
+
+    const phone = authForm.phone.value.trim();
+    const password = authForm.password.value.trim();
+    const passwordRepeat = authForm['password-repeat'].value.trim();
+    const recoveryQuestion = authForm['recovery-question'].value.trim();
+
+    if(isRegisterMode){
+      if(password !== passwordRepeat){
+        authError.textContent = 'رمز عبور و تکرار آن مطابقت ندارند.';
+        return;
+      }
+      if(password.length < 6){
+        authError.textContent = 'رمز عبور باید حداقل 6 کاراکتر باشد.';
+        return;
+      }
+      const res = registerUser(phone, password, recoveryQuestion);
+      if(!res.success){
+        authError.textContent = res.message;
+        return;
+      }
+      alert('ثبت نام با موفقیت انجام شد. حالا وارد شوید.');
+      isRegisterMode = false;
+      authToggle.click();
+      authForm.reset();
+    } else {
+      const res = loginUser(phone, password);
+      if(!res.success){
+        authError.textContent = res.message;
+        return;
+      }
+      currentUser = phone;
+      authSection.style.display = 'none';
+      chatSection.style.display = 'flex';
+      loadAndRenderMessages();
+      applySettingsFromStorage();
+    }
   });
-}
 
-submitCommentBtn.addEventListener("click", () => {
-  const comment = commentInput.value.trim();
-  if (!comment) {
-    alert(translations[lang].alertEmptyComment);
-    return;
+  // --- بارگذاری و نمایش پیام‌ها ---
+  function loadAndRenderMessages(){
+    if(!currentUser) return;
+    const messages = loadMessages(currentUser);
+    renderMessages(messages);
   }
-  const comments = JSON.parse(localStorage.getItem("comments") || "[]");
-  comments.push(comment);
-  localStorage.setItem("comments", JSON.stringify(comments));
-  commentInput.value = "";
-  loadComments();
-  alert(translations[lang].alertCommentSaved);
-});
 
-function updateDateDisplay(){
-  const now = new Date();
-  const gy = now.getFullYear();
-  const gm = now.getMonth() + 1;
-  const gd = now.getDate();
-  const [jy, jm, jd] = toJalaali(gy, gm, gd);
-  const jsWeekdayIndex = now.getDay();
-  const weekdayFa = weekdaysFa[jsWeekdayIndex];
-  const weekdayAr = weekdaysAr[jsWeekdayIndex];
-  dateDisplay.textContent = lang === "fa" ? `امروز: ${weekdayFa} - ${jy}/${jm.toString().padStart(2,"0")}/${jd.toString().padStart(2,"0")}` : `اليوم: ${weekdayAr} - ${jy}/${jm.toString().padStart(2,"0")}/${jd.toString().padStart(2,"0")}`;
-}
+  // --- ارسال پیام در چت ---
+  chatSendBtn.addEventListener('click', () => {
+    const text = chatText.value.trim();
+    if(text === '') return;
+    // ذخیره پیام کاربر
+    saveMessage(currentUser, text, 'user');
+    renderMessages(loadMessages(currentUser));
+    chatText.value = '';
 
-// بارگذاری اولیه
-const apiKey = "dc9c93f51cdd375d459483c2a9f86d88";
+    // شبیه‌سازی پاسخ شما (ادمین)
+    setTimeout(() => {
+      const adminReply = "پیام شما دریافت شد. در اسرع وقت پاسخ می‌دهیم.";
+      saveMessage(currentUser, adminReply, 'admin');
+      renderMessages(loadMessages(currentUser));
+    }, 1000);
+  });
 
-loadComments();
-updateDateDisplay();
-fetchWeather("اهواز");
+  // ارسال با اینتر در textarea چت
+  chatText.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      chatSendBtn.click();
+    }
+  });
+
+  // --- تنظیمات ---
+
+  // باز/بسته کردن مودال تنظیمات
+  settingsBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'block';
+  });
+  closeSettingsBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'none';
+  });
+
+  // تغییر تم
+  themeSelect.addEventListener('change', () => {
+    if(themeSelect.value === 'dark'){
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+    localStorage.setItem('theme', themeSelect.value);
+  });
+
+  // تغییر فونت
+  fontSelect.addEventListener('change', () => {
+    document.body.classList.remove('font-tahoma','font-vazir','font-irsans','font-sahel');
+    document.body.classList.add(fontSelect.value);
+    localStorage.setItem('font', fontSelect.value);
+  });
+
+  // تغییر اندازه فونت
+  fontSizeRange.addEventListener('input', () => {
+    document.body.style.fontSize = fontSizeRange.value + 'px';
+    localStorage.setItem('fontSize', fontSizeRange.value);
+  });
+
+  // بارگذاری تنظیمات ذخیره شده
+  function applySettingsFromStorage(){
+    const theme = localStorage.getItem('theme') || 'light';
+    themeSelect.value = theme;
+    if(theme === 'dark') document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
+
+    const font = localStorage.getItem('font') || 'font-tahoma';
+    fontSelect.value = font;
+    document.body.classList.remove('font-tahoma','font-vazir','font-irsans','font-sahel');
+    document.body.classList.add(font);
+
+    const fontSize = localStorage.getItem('fontSize') || '16';
+    fontSizeRange.value = fontSize;
+    document.body.style.fontSize = fontSize + 'px';
+  }
+
+  // بارگذاری تنظیمات هنگام لود صفحه
+  window.addEventListener('load', () => {
+    applySettingsFromStorage();
+  });
+
+  // دکمه تغییر زبان (فارسی/عربی) - فقط نمایشی
+  const languageToggle = document.getElementById('language-toggle');
+  languageToggle.addEventListener('click', () => {
+    if(languageToggle.textContent === 'AR'){
+      languageToggle.textContent = 'FA';
+      alert('زبان به عربی تغییر کرد (نمایشی)');
+      // اینجا می‌توانید ترجمه‌ها یا تغییرات زبان را اضافه کنید
+    } else {
+      languageToggle.textContent = 'AR';
+      alert('زبان به فارسی تغییر کرد (نمایشی)');
+    }
+  });
+
 </script>
+
 </body>
 </html>
