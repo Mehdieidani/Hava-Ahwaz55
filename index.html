@@ -7,19 +7,20 @@
   <style>
     body {
       font-family: sans-serif;
-      background: #101d2c;
-      color: #fff;
+      background: #0d1f2d;
+      color: #eee;
       margin: 0;
       padding: 0;
       direction: rtl;
     }
     header {
-      background: linear-gradient(to left, #0077b6, #00b4d8);
+      background: linear-gradient(to left, #0097a7, #00bcd4);
       padding: 1rem;
       text-align: center;
       font-size: 1.8rem;
       font-weight: bold;
       position: relative;
+      color: white;
     }
     #language-toggle {
       position: absolute;
@@ -40,17 +41,17 @@
     #searchInput {
       padding: 0.5rem;
       width: 70%;
+      max-width: 400px;
       border-radius: 5px;
       border: none;
       font-size: 1rem;
-      max-width: 400px;
     }
     #get-location {
       margin-left: 10px;
       padding: 0.5rem 1rem;
       border-radius: 5px;
       border: none;
-      background: #00b4d8;
+      background: #00bcd4;
       color: white;
       cursor: pointer;
       font-weight: bold;
@@ -61,48 +62,43 @@
       padding: 0 1rem;
     }
     .day {
-      background: #1a2a3a;
+      background: #143447;
       border-radius: 10px;
       margin-bottom: 1rem;
       padding: 1rem;
       position: relative;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .day:hover {
-      background: #265078;
     }
     .star {
       position: absolute;
       top: 15px;
       left: 15px;
-      font-size: 1.5rem;
+      font-size: 2rem;
       color: gold;
       user-select: none;
       cursor: pointer;
     }
-    .hourly {
-      display: none;
-      background: #233447;
-      margin-top: 1rem;
-      padding: 1rem;
+    .day-section {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      background: #1c476b;
       border-radius: 8px;
-      max-height: 300px;
-      overflow-y: auto;
+      padding: 0.7rem 1rem;
+      align-items: center;
     }
-    .hourly div {
-      border-bottom: 1px solid #444;
-      padding: 6px 0;
-      font-size: 0.9rem;
+    .day-section div {
+      flex: 1;
+      text-align: center;
+      font-size: 1rem;
     }
     .weather-icon {
-      vertical-align: middle;
-      width: 48px;
-      height: 48px;
-      margin-left: 10px;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      display: block;
     }
     .favorite-btn {
-      background: #0077b6;
+      background: #00838f;
       border: none;
       padding: 0.4rem 1rem;
       border-radius: 5px;
@@ -132,7 +128,7 @@
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 5px;
-      background: #00b4d8;
+      background: #00bcd4;
       color: white;
       cursor: pointer;
       font-weight: bold;
@@ -223,9 +219,10 @@
         alertCommentSaved: "نظر شما ثبت شد.",
         errorFetch: "❗ خطا در دریافت اطلاعات، دوباره تلاش کنید.",
         wind: "باد",
-        tempAvg: "دمای میانگین",
-        favoriteAdded: "به علاقه‌مندی‌ها اضافه شد.",
-        favoriteRemoved: "از علاقه‌مندی‌ها حذف شد.",
+        tempMax: "دمای بیشینه روز",
+        tempMin: "دمای کمینه شب",
+        favoriteAdded: "شهر به علاقه‌مندی‌ها اضافه شد.",
+        favoriteRemoved: "شهر از علاقه‌مندی‌ها حذف شد.",
         humidity: "رطوبت",
         pressure: "فشار",
         status: "وضعیت",
@@ -245,9 +242,10 @@
         alertCommentSaved: "تم حفظ تعليقك.",
         errorFetch: "❗ خطأ في تحميل البيانات، حاول مرة أخرى.",
         wind: "الرياح",
-        tempAvg: "متوسط درجة الحرارة",
-        favoriteAdded: "أُضيف إلى المفضلة.",
-        favoriteRemoved: "تم الحذف من المفضلة.",
+        tempMax: "درجة حرارة النهار القصوى",
+        tempMin: "درجة حرارة الليل الدنيا",
+        favoriteAdded: "تمت إضافة المدينة للمفضلة.",
+        favoriteRemoved: "تم حذف المدينة من المفضلة.",
         humidity: "الرطوبة",
         pressure: "الضغط",
         status: "الحالة",
@@ -272,7 +270,6 @@
       commentsTitle.textContent = translations[lang].commentsTitle;
       commentInput.placeholder = translations[lang].commentPlaceholder;
       submitCommentBtn.textContent = translations[lang].sendBtn;
-      // Refresh forecast if any city shown
       if (searchInput.value.trim() !== "") {
         fetchWeather(searchInput.value.trim());
       }
@@ -280,23 +277,23 @@
 
     langToggle.addEventListener("click", toggleLanguage);
 
-    function saveFavorite(day) {
-      localStorage.setItem("fav_" + day, "1");
+    function saveFavorite(city) {
+      localStorage.setItem("fav_city_" + city.toLowerCase(), "1");
     }
-    function removeFavorite(day) {
-      localStorage.removeItem("fav_" + day);
+    function removeFavorite(city) {
+      localStorage.removeItem("fav_city_" + city.toLowerCase());
     }
-    function isFavorite(day) {
-      return localStorage.getItem("fav_" + day) === "1";
+    function isFavorite(city) {
+      return localStorage.getItem("fav_city_" + city.toLowerCase()) === "1";
     }
 
-    function toggleFavorite(day, starElement) {
-      if (isFavorite(day)) {
-        removeFavorite(day);
+    function toggleFavorite(city, starElement) {
+      if (isFavorite(city)) {
+        removeFavorite(city);
         starElement.textContent = "☆";
         alert(translations[lang].favoriteRemoved);
       } else {
-        saveFavorite(day);
+        saveFavorite(city);
         starElement.textContent = "★";
         alert(translations[lang].favoriteAdded);
       }
@@ -305,16 +302,17 @@
     async function fetchWeather(city) {
       forecastDiv.innerHTML = lang === "fa" ? "در حال دریافت اطلاعات..." : "جارٍ تحميل البيانات...";
       try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=${lang}`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=${lang}`);
         const data = await res.json();
-        if (!data.list) throw new Error();
-        displayForecast(data.list);
+        if (!data.list || data.cod !== "200") throw new Error();
+        searchInput.value = data.city.name;
+        displayForecast(data.list, data.city.name);
       } catch {
         forecastDiv.innerHTML = translations[lang].errorFetch;
       }
     }
 
-    function displayForecast(list) {
+    function displayForecast(list, cityName) {
       // گروه بندی داده‌ها بر اساس روز
       const days = {};
       list.forEach(item => {
@@ -324,48 +322,76 @@
       });
 
       forecastDiv.innerHTML = "";
+
+      const favStar = isFavorite(cityName) ? "★" : "☆";
+
+      // ستاره علاقه‌مندی برای کل شهر:
+      const starDiv = document.createElement("div");
+      starDiv.className = "star";
+      starDiv.title = lang === "fa" ? "علاقه‌مندی شهر" : "مفضلة المدينة";
+      starDiv.textContent = favStar;
+      starDiv.addEventListener("click", () => toggleFavorite(cityName, starDiv));
+      forecastDiv.appendChild(starDiv);
+
       Object.keys(days).slice(0, 5).forEach(day => {
         const dayItems = days[day];
-        const firstItem = dayItems[0];
-        const isFav = isFavorite(day);
-        const star = isFav ? "★" : "☆";
+
+        // بیشینه دما روز (حدود 9 تا 15 عصر)
+        const dayTemps = dayItems.filter(item => {
+          const hour = parseInt(item.dt_txt.split(" ")[1].slice(0,2));
+          return hour >= 9 && hour <= 15;
+        });
+
+        // کمینه دما شب (حدود 21 تا 5 صبح)
+        const nightTemps = dayItems.filter(item => {
+          const hour = parseInt(item.dt_txt.split(" ")[1].slice(0,2));
+          return hour >= 21 || hour <= 5;
+        });
+
+        const maxDayTempObj = dayTemps.reduce((prev, curr) => prev.main.temp_max > curr.main.temp_max ? prev : curr, dayTemps[0] || dayItems[0]);
+        const minNightTempObj = nightTemps.reduce((prev, curr) => prev.main.temp_min < curr.main.temp_min ? prev : curr, nightTemps[0] || dayItems[0]);
 
         const dayDiv = document.createElement("div");
         dayDiv.className = "day";
 
         dayDiv.innerHTML = `
-          <div class="star" title="علاقه‌مندی">${star}</div>
           <div><strong>${lang === "fa" ? "روز" : "اليوم"}: ${day}</strong></div>
-          <div>
-            <img class="weather-icon" src="https://openweathermap.org/img/wn/${firstItem.weather[0].icon}@2x.png" alt="${firstItem.weather[0].description}" />
-            ${firstItem.weather[0].description}
-          </div>
-          <div>${translations[lang].tempAvg}: ${firstItem.main.temp}°C</div>
-          <div>${translations[lang].wind}: ${firstItem.wind.speed} km/h - ${windDirection(firstItem.wind.deg)}</div>
-          <button class="favorite-btn">${translations[lang].showHourly}</button>
-          <div class="hourly"></div>
-        `;
 
-        // اضافه کردن لیست ساعتی
-        const hourlyDiv = dayDiv.querySelector(".hourly");
-        hourlyDiv.innerHTML = dayItems.map(item => `
-          <div>
-            ${translations[lang].hour}: ${item.dt_txt.split(" ")[1].slice(0,5)} |
-            ${translations[lang].temp}: ${item.main.temp}°C |
-            ${translations[lang].humidity}: ${item.main.humidity}% |
-            ${translations[lang].pressure}: ${item.main.pressure} hPa |
-            ${translations[lang].wind}: ${item.wind.speed} km/h - ${windDirection(item.wind.deg)} |
-            ${translations[lang].status}: ${item.weather[0].description}
+          <div class="day-section" title="${translations[lang].tempMax}">
+            <div>${lang === "fa" ? "روز (بیشینه)" : "نهار (قصوى)"}</div>
+            <div>
+              <img class="weather-icon" src="https://openweathermap.org/img/wn/${maxDayTempObj.weather[0].icon}@2x.png" alt="${maxDayTempObj.weather[0].description}" />
+            </div>
+            <div>${maxDayTempObj.main.temp_max.toFixed(1)}°C</div>
           </div>
-        `).join("");
+
+          <div class="day-section" title="${translations[lang].tempMin}">
+            <div>${lang === "fa" ? "شب (کمینه)" : "ليل (دنيا)"}</div>
+            <div>
+              <img class="weather-icon" src="https://openweathermap.org/img/wn/${minNightTempObj.weather[0].icon}@2x.png" alt="${minNightTempObj.weather[0].description}" />
+            </div>
+            <div>${minNightTempObj.main.temp_min.toFixed(1)}°C</div>
+          </div>
+
+          <button class="favorite-btn">${translations[lang].showHourly}</button>
+          <div class="hourly" style="display:none;">
+            ${dayItems.map(item => `
+              <div>
+                ${translations[lang].hour}: ${item.dt_txt.split(" ")[1].slice(0,5)} |
+                ${translations[lang].temp}: ${item.main.temp.toFixed(1)}°C |
+                ${translations[lang].humidity}: ${item.main.humidity}% |
+                ${translations[lang].pressure}: ${item.main.pressure} hPa |
+                ${translations[lang].wind}: ${item.wind.speed} km/h - ${windDirection(item.wind.deg)} |
+                ${translations[lang].status}: ${item.weather[0].description}
+              </div>
+            `).join("")}
+          </div>
+        `;
 
         forecastDiv.appendChild(dayDiv);
 
-        // رویدادها
-        const starEl = dayDiv.querySelector(".star");
-        starEl.addEventListener("click", () => toggleFavorite(day, starEl));
-
         const toggleBtn = dayDiv.querySelector(".favorite-btn");
+        const hourlyDiv = dayDiv.querySelector(".hourly");
         toggleBtn.addEventListener("click", () => {
           if (hourlyDiv.style.display === "block") {
             hourlyDiv.style.display = "none";
@@ -378,7 +404,6 @@
       });
     }
 
-    // رویداد جستجو با اینتر
     searchInput.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         const city = searchInput.value.trim();
@@ -386,7 +411,6 @@
       }
     });
 
-    // دکمه موقعیت من
     getLocationBtn.addEventListener("click", () => {
       if (!navigator.geolocation) {
         alert(lang === "fa" ? "مرورگر شما از GPS پشتیبانی نمی‌کند." : "المتصفح لا يدعم GPS.");
@@ -400,7 +424,7 @@
           .then(data => {
             if (!data.list) throw new Error();
             searchInput.value = data.city.name;
-            displayForecast(data.list);
+            displayForecast(data.list, data.city.name);
           })
           .catch(() => {
             alert(lang === "fa" ? "خطا در دریافت اطلاعات موقعیت." : "خطأ في تحميل بيانات الموقع.");
@@ -410,7 +434,7 @@
       });
     });
 
-    // بخش نظرات
+    // بخش نظرات و پیشنهادات
     function loadComments() {
       const comments = JSON.parse(localStorage.getItem("comments") || "[]");
       commentsContainer.innerHTML = "";
@@ -430,16 +454,4 @@
       }
       const comments = JSON.parse(localStorage.getItem("comments") || "[]");
       comments.push(val);
-      localStorage.setItem("comments", JSON.stringify(comments));
-      commentInput.value = "";
-      loadComments();
-      alert(translations[lang].alertCommentSaved);
-    });
-
-    loadComments();
-
-    // بارگذاری پیش‌فرض
-    fetchWeather("اهواز");
-  </script>
-</body>
-</html>
+      localStorage
