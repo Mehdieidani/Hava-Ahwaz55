@@ -1,164 +1,139 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>وضعیت آب‌وهوا</title>
+  <meta charset="UTF-8">
+  <title>پیش‌بینی دقیق هواشناسی</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      margin: 0;
-      font-family: 'Vazir', sans-serif;
-      background: #121212;
+      font-family: Tahoma, sans-serif;
+      background-color: #121212;
       color: #fff;
+      margin: 0;
+      padding: 20px;
       direction: rtl;
     }
-    header {
-      background: #1e1e1e;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #cityInput {
-      width: 60%;
-      padding: 8px;
-      font-size: 16px;
-      border: none;
-      border-radius: 4px;
-    }
-    #searchBtn {
-      padding: 8px 12px;
-      background: #1976d2;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      margin-right: 10px;
-    }
-    #langToggle {
-      background: #333;
-      border: none;
-      color: white;
-      padding: 8px;
-      border-radius: 4px;
-    }
-    .ad-box {
-      background: #272727;
-      margin: 10px;
-      padding: 10px;
-      border: 1px solid #444;
-      border-radius: 6px;
+    h1, h2 {
       text-align: center;
+      margin-bottom: 10px;
     }
-    .ad-box a {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 10px 20px;
-      background: #00c853;
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 6px;
-    }
-    .weather-section {
-      padding: 10px;
-    }
-    .weather-card {
-      background: #1f1f1f;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 6px;
-      box-shadow: 0 0 5px #000;
-    }
-    .weather-card h3 {
-      margin: 0 0 10px 0;
-    }
-    .hourly-details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    #forecast, #dailyForecast {
+      margin-top: 20px;
     }
     .hour-card {
-      flex: 1 1 45%;
-      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 10px;
       padding: 10px;
-      border-radius: 6px;
+      margin: 10px 0;
+      background-color: #1f1f1f;
       text-align: center;
     }
-    .hour-card img {
-      width: 50px;
+    .collapsible {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      text-align: right;
+      outline: none;
+      font-size: 16px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    .active, .collapsible:hover {
+      background-color: #555;
+    }
+    .content {
+      padding: 0 15px;
+      display: none;
+      overflow: hidden;
+      background-color: #1f1f1f;
+      border-radius: 6px;
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 12px;
+      color: #888;
+    }
+    select, button {
+      font-size: 14px;
+      margin: 5px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+    }
+    .lang-btn {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
     }
   </style>
 </head>
 <body>
-  <header>
-    <input type="text" id="cityInput" placeholder="نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)" />
-    <button id="searchBtn">جستجو</button>
-    <button id="langToggle">AR</button>
-  </header>
+  <button class="lang-btn" onclick="switchLanguage()">🌐</button>
+  <h1 id="title">پیش‌بینی دقیق هواشناسی</h1>
 
-  <div class="ad-box">
-    <p>📞 تماس فوری با کارشناس</p>
-    <a href="tel:09332356547">تماس: 09332356547</a>
+  <div>
+    <input type="text" id="cityInput" placeholder="نام شهر را وارد کنید..." onkeypress="if(event.key==='Enter') getWeather()">
+    <button onclick="getWeather()">نمایش آب‌وهوا</button>
   </div>
 
-  <div class="weather-section">
-    <h2 id="title">وضعیت آب‌وهوا</h2>
-    <h3 id="cityName">شهر: اهواز</h3>
-    <div id="dailyForecast"></div>
-  </div>
+  <div id="forecast"></div>
+  <div id="dailyForecast"></div>
+
+  <footer>حقوق مادی و معنوی محفوظ است © Mehdi Eidani</footer>
 
   <script>
-    const API_KEY = "dc9c93f51cdd375d459483c2a9f86d88";
-    let currentLang = "fa";
+    let lang = "fa"; // fa or ar
+    const apiKey = "dc9c93f51cdd375d459483c2a9f86d88";
 
-    const labels = {
-      fa: {
-        title: "وضعیت آب‌وهوا",
-        searchPlaceholder: "نام شهر یا روستا (مثلاً اهواز یا Kazemi Do)",
-        call: "📞 تماس با 09332356547",
-        notFound: "شهر مورد نظر پیدا نشد.",
-        forecast: "پیش‌بینی روزانه"
-      },
-      ar: {
-        title: "حالة الطقس",
-        searchPlaceholder: "أدخل اسم المدينة أو القرية",
-        call: "📞 اتصل بـ 09332356547",
-        notFound: "لم يتم العثور على المدينة المطلوبة.",
-        forecast: "توقعات الطقس اليومية"
+    function switchLanguage() {
+      lang = lang === "fa" ? "ar" : "fa";
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === "fa" ? "rtl" : "rtl";
+
+      document.getElementById("title").innerText =
+        lang === "fa" ? "پیش‌بینی دقیق هواشناسی" : "توقعات الطقس الدقيقة";
+      document.getElementById("cityInput").placeholder =
+        lang === "fa" ? "نام شهر را وارد کنید..." : "أدخل اسم المدينة...";
+      document.querySelector("button[onclick='getWeather()']").innerText =
+        lang === "fa" ? "نمایش آب‌وهوا" : "عرض الطقس";
+
+      const city = document.getElementById("cityInput").value;
+      if (city) getWeather();
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      if (lang === "fa") {
+        return new Intl.DateTimeFormat("fa-IR", {
+          weekday: "long", year: "numeric", month: "long", day: "numeric"
+        }).format(date);
+      } else {
+        return new Intl.DateTimeFormat("ar-EG", {
+          weekday: "long", year: "numeric", month: "long", day: "numeric"
+        }).format(date);
       }
-    };
+    }
 
-    document.getElementById("langToggle").addEventListener("click", () => {
-      currentLang = currentLang === "fa" ? "ar" : "fa";
-      document.getElementById("title").innerText = labels[currentLang].title;
-      document.getElementById("cityInput").placeholder = labels[currentLang].searchPlaceholder;
-      document.getElementById("langToggle").innerText = currentLang === "fa" ? "AR" : "FA";
-      document.querySelector(".ad-box p").innerText = labels[currentLang].call;
-    });
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value || "اهواز";
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&lang=${lang}&units=metric&appid=${apiKey}`);
+      const data = await response.json();
 
-    document.getElementById("searchBtn").addEventListener("click", searchCity);
-
-    async function searchCity() {
-      const city = document.getElementById("cityInput").value.trim();
-      if (!city) return;
-      try {
-        const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${API_KEY}`);
-        const geoData = await geoRes.json();
-        if (!geoData.length) {
-          alert(labels[currentLang].notFound);
-          return;
-        }
-
-        const { lat, lon, name, country } = geoData[0];
-        document.getElementById("cityName").innerText = `${name}, ${country}`;
-
-        const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=${currentLang}&appid=${API_KEY}`);
-        const weatherData = await weatherRes.json();
-
-        displayForecast(weatherData);
-      } catch (err) {
-        alert("خطا در دریافت اطلاعات، دوباره تلاش کنید.");
+      if (data.cod !== "200") {
+        document.getElementById("forecast").innerHTML =
+          lang === "fa" ? "خطا در دریافت اطلاعات، لطفاً دوباره تلاش کنید" : "حدث خطأ في جلب البيانات، الرجاء المحاولة مرة أخرى.";
+        document.getElementById("dailyForecast").innerHTML = "";
+        return;
       }
+
+      document.getElementById("forecast").innerHTML = `<h2>${city}</h2>`;
+
+      displayForecast(data);
     }
 
     function displayForecast(data) {
@@ -166,7 +141,6 @@
       forecastDiv.innerHTML = "";
 
       const days = {};
-
       data.list.forEach(item => {
         const date = item.dt_txt.split(" ")[0];
         if (!days[date]) days[date] = [];
@@ -178,7 +152,6 @@
         const minTemp = Math.min(...dayData.map(d => d.main.temp_min)).toFixed(1);
         const maxTemp = Math.max(...dayData.map(d => d.main.temp_max)).toFixed(1);
         const desc = dayData[0].weather[0].description;
-        const icon = dayData[0].weather[0].icon;
 
         let hourHtml = "";
         dayData.forEach(h => {
@@ -197,19 +170,26 @@
         });
 
         forecastDiv.innerHTML += `
-          <div class="weather-card">
-            <h3>📅 ${date}</h3>
-            <p>🌤 ${desc} | 🔺 بیشینه: ${maxTemp}° | 🔻 کمینه: ${minTemp}°</p>
-            <div class="hourly-details">${hourHtml}</div>
-          </div>
+          <button class="collapsible">📅 ${formatDate(date)} | 🌤 ${desc} | 🔺 ${maxTemp}° | 🔻 ${minTemp}°</button>
+          <div class="content"><div class="hourly-details">${hourHtml}</div></div>
         `;
+      }
+
+      const coll = document.getElementsByClassName("collapsible");
+      for (let i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function () {
+          this.classList.toggle("active");
+          const content = this.nextElementSibling;
+          content.style.display = content.style.display === "block" ? "none" : "block";
+        });
       }
     }
 
+    // پیش‌نمایش شهر اهواز هنگام بارگذاری
     window.onload = () => {
       document.getElementById("cityInput").value = "اهواز";
-      searchCity();
-    };
+      getWeather();
+    }
   </script>
 </body>
 </html>
